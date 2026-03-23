@@ -14,7 +14,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
   const [textInput, setTextInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [role, setRole] = useState("Umum");
+  const [role, setRole] = useState("General");
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
     }
   };
 
-  const roles = ["Umum", "Mahasiswa", "Programmer", "Bisnis", "Pengacara"];
+  const roles = ["General", "Student", "Programmer", "Business", "Lawyer"];
 
   return (
     <Card className="w-full max-w-2xl mx-auto shadow-lg backdrop-blur-sm bg-white/50 dark:bg-zinc-900/50 border-white/20 overflow-hidden relative">
