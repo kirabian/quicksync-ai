@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Download, Check, Globe, Send, Loader2, X, Settings, Volume2, VolumeX, History, Printer, Calendar, Trello, Link as LinkIcon } from "lucide-react";
+import { Copy, Download, Check, Globe, Send, Loader2, X, Settings, Volume2, VolumeX, History, Calendar, Link as LinkIcon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import LZString from "lz-string";
@@ -25,6 +25,7 @@ export default function ResultView({ markdown }: { markdown: string }) {
 
   // TTS states
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   // Notion state
   const [showNotionModal, setShowNotionModal] = useState(false);
@@ -88,17 +89,37 @@ export default function ResultView({ markdown }: { markdown: string }) {
       return;
     }
 
-    const textToRead = displayMarkdown.replace(/#/g, "").replace(/\*/g, "");
+    if (!window.speechSynthesis) {
+      toast.error("Text-to-speech not supported in this browser.");
+      return;
+    }
+
+    // Cancel any ongoing speech first
+    window.speechSynthesis.cancel();
+
+    const textToRead = displayMarkdown.replace(/#/g, "").replace(/\*/g, "").replace(/\[|\]/g, "");
     const utterance = new SpeechSynthesisUtterance(textToRead);
+    utteranceRef.current = utterance; // Store to prevent GC
     
+    // Auto-detect voice based on language
+    const voices = window.speechSynthesis.getVoices();
     if (detectedLang === "ID") utterance.lang = "id-ID";
     else if (detectedLang === "JA") utterance.lang = "ja-JP";
     else if (detectedLang === "ES") utterance.lang = "es-ES";
     else utterance.lang = "en-US";
 
-    utterance.onend = () => setIsPlayingAudio(false);
+    utterance.onstart = () => setIsPlayingAudio(true);
+    utterance.onend = () => {
+      setIsPlayingAudio(false);
+      utteranceRef.current = null;
+    };
+    utterance.onerror = (e) => {
+      console.error("TTS Error:", e);
+      setIsPlayingAudio(false);
+      utteranceRef.current = null;
+    };
+
     window.speechSynthesis.speak(utterance);
-    setIsPlayingAudio(true);
   };
 
   const getLangBadge = (code: string) => {
@@ -121,6 +142,7 @@ export default function ResultView({ markdown }: { markdown: string }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+
   const handleDownload = () => {
     const blob = new Blob([displayMarkdown], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
@@ -135,34 +157,19 @@ export default function ResultView({ markdown }: { markdown: string }) {
   };
 
   const handleShareLink = () => {
-    // We include the language tag if present so the recipient sees the correct language formatting
     const contentToEncode = detectedLang ? `[LANG:${detectedLang}] ${displayMarkdown}` : displayMarkdown;
     const encoded = LZString.compressToEncodedURIComponent(contentToEncode);
     const shareUrl = `${window.location.origin}/?share=${encoded}`;
     navigator.clipboard.writeText(shareUrl);
-    toast.success("Collaboration link copied! Anyone with the link can view this document.");
-  };
-
-  const handlePrintPdf = () => {
-    window.print();
+    toast.success("Collaboration link copied!");
   };
 
   const handleGoogleCalendar = () => {
     const url = new URL('https://calendar.google.com/calendar/render');
     url.searchParams.append('action', 'TEMPLATE');
     url.searchParams.append('text', 'Meeting from QuickSync AI');
-    url.searchParams.append('details', displayMarkdown.substring(0, 500)); // Truncate
+    url.searchParams.append('details', displayMarkdown.substring(0, 500));
     window.open(url.toString(), '_blank');
-  };
-
-  const handleJiraTicket = () => {
-    const title = encodeURIComponent('Task from QuickSync AI');
-    const desc = encodeURIComponent(displayMarkdown.substring(0, 1000));
-    // A standard Jira URL schema used by many organizations to pre-fill standard ticket creation
-    // Assuming standard paths
-    const url = `https://your-domain.atlassian.net/secure/CreateIssueDetails!init.jspa?pid=10000&issuetype=10001&summary=${title}&description=${desc}`;
-    window.open(url, '_blank');
-    toast.info("Opened Jira ticket template. Replace 'your-domain' in URL with your real workspace.");
   };
 
   const handleTranslate = async (langName: string) => {
@@ -237,12 +244,6 @@ export default function ResultView({ markdown }: { markdown: string }) {
         </Button>
         <Button variant="outline" size="sm" onClick={handleGoogleCalendar} className="gap-2 text-primary hover:text-primary hover:bg-primary/10 transition-colors border-primary/20">
           <Calendar className="w-4 h-4" /> Google Calendar
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleJiraTicket} className="gap-2 text-blue-600 hover:text-blue-600 hover:bg-blue-600/10 transition-colors border-blue-600/20">
-          <Trello className="w-4 h-4" /> Create Jira Ticket
-        </Button>
-        <Button variant="outline" size="sm" onClick={handlePrintPdf} className="gap-2 transition-colors">
-          <Printer className="w-4 h-4" /> Print / PDF
         </Button>
       </div>
 
