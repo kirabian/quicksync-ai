@@ -5,5 +5,5 @@ if (!process.env.GEMINI_API_KEY) {
 }
 
 export const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-// Berdasarkan hasil diagnosa API, ID yang tepat adalah gemini-3.1-flash-lite-preview.
-export const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+// Menggunakan gemini-1.5-flash-latest untuk kompatibilitas paling stabil di semua region.
+export const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });

@@ -25,7 +25,12 @@ CRITICAL RULES:
     const prompt = `${systemInstruction}\n\nOriginal Text to Translate:\n${text}`;
 
     const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const response = await result.response;
+    const responseText = response.text();
+
+    if (!responseText) {
+      throw new Error("No translation response received from AI.");
+    }
 
     return NextResponse.json({ result: responseText });
   } catch (error: any) {
