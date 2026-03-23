@@ -1,9 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-if (!process.env.GEMINI_API_KEY) {
+if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
   console.warn("Missing GEMINI_API_KEY in environment variables");
 }
 
-export const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+export const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
 // Menggunakan Gemini 2.5 Flash karena API Key Anda ternyata mendapat akses ke model terbaru ini!
 export const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
