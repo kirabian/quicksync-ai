@@ -6,4 +6,4 @@ if (!process.env.GEMINI_API_KEY) {
 
 export const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 // Menggunakan Gemini 2.5 Flash karena API Key Anda ternyata mendapat akses ke model terbaru ini!
-export const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+export const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
