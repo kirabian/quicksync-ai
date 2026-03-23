@@ -41,7 +41,7 @@ export default function RootLayout({
             <header className="py-4 px-6 md:px-12 flex items-center justify-between border-b bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md sticky top-0 z-50">
               <h1 className="text-xl font-bold font-heading tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">QuickSync AI</h1>
               <nav className="flex items-center gap-4">
-                <a href="https://github.com/fabian/quicksync" target="_blank" rel="noreferrer" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Star on GitHub</a>
+                <a href="https://github.com/kirabian/quicksync-ai" target="_blank" rel="noreferrer" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Star on GitHub</a>
                 <ThemeToggle />
               </nav>
             </header>
