@@ -4,21 +4,39 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Download, Check, Globe } from "lucide-react";
-import { useState } from "react";
+import { Copy, Download, Check, Globe, Send, Loader2, X, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export default function ResultView({ markdown }: { markdown: string }) {
   const [copied, setCopied] = useState(false);
+  const [currentMarkdown, setCurrentMarkdown] = useState(markdown);
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  // Notion state
+  const [showNotionModal, setShowNotionModal] = useState(false);
+  const [notionToken, setNotionToken] = useState("");
+  const [notionPageId, setNotionPageId] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
+  const [showTranslationMenu, setShowTranslationMenu] = useState(false);
+
+  useEffect(() => {
+    setCurrentMarkdown(markdown);
+  }, [markdown]);
+
+  useEffect(() => {
+    setNotionToken(localStorage.getItem("notionToken") || "");
+    setNotionPageId(localStorage.getItem("notionPageId") || "");
+  }, []);
 
   // Parse language tag
-  let displayMarkdown = markdown;
+  let displayMarkdown = currentMarkdown;
   let detectedLang = "";
 
-  const langMatch = markdown.match(/^\[LANG:([A-Za-z]+)\]\s*/);
+  const langMatch = currentMarkdown.match(/^\[LANG:([A-Za-z]+)\]\s*/);
   if (langMatch) {
     detectedLang = langMatch[1].toUpperCase();
-    displayMarkdown = markdown.replace(/^\[LANG:[A-Za-z]+\]\s*/, "");
+    displayMarkdown = currentMarkdown.replace(/^\[LANG:[A-Za-z]+\]\s*/, "");
   }
 
   const getLangBadge = (code: string) => {
@@ -54,38 +72,192 @@ export default function ResultView({ markdown }: { markdown: string }) {
     toast.success("Downloaded successfully!");
   };
 
+  const handleTranslate = async (langName: string) => {
+    setShowTranslationMenu(false);
+    setIsTranslating(true);
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: currentMarkdown, targetLanguage: langName })
+      });
+      if (!res.ok) throw new Error("Translation failed");
+      const data = await res.json();
+      setCurrentMarkdown(data.result);
+      toast.success(`Translated to ${langName}`);
+    } catch (err: any) {
+      toast.error(err.message || "Translation error");
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const saveNotionSettings = () => {
+    localStorage.setItem("notionToken", notionToken);
+    localStorage.setItem("notionPageId", notionPageId);
+    toast.success("Notion settings saved!");
+    if (notionToken && notionPageId) {
+      handleExportNotion();
+    }
+  };
+
+  const handleExportNotion = async () => {
+    if (!notionToken || !notionPageId) {
+      setShowNotionModal(true);
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const res = await fetch("/api/notion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markdown: displayMarkdown, token: notionToken, pageId: notionPageId })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.details || err.error || "Failed to export to Notion");
+      }
+      toast.success("Successfully sent to Notion!");
+      setShowNotionModal(false);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (!markdown) return null;
 
+  const translationOptions = ["English", "Indonesian", "Japanese", "Spanish", "French", "Korean", "Chinese"];
+
   return (
-    <Card className="w-full max-w-4xl mx-auto mt-8 shadow-xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur border-zinc-200 dark:border-zinc-800 transition-all overflow-hidden relative">
-      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b space-y-0">
-        <div className="flex flex-wrap items-center gap-3">
-          <CardTitle className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-            Your Processed Notes
-          </CardTitle>
-          {detectedLang && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold leading-none bg-primary/10 text-primary border border-primary/20 shadow-sm animate-in fade-in zoom-in duration-300">
-              {getLangBadge(detectedLang)}
-            </span>
-          )}
+    <>
+      <Card className="w-full max-w-4xl mx-auto mt-8 shadow-xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur border-zinc-200 dark:border-zinc-800 transition-all overflow-hidden relative">
+        <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b space-y-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <CardTitle className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+              Your Processed Notes
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              {detectedLang && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold leading-none bg-primary/10 text-primary border border-primary/20 shadow-sm animate-in fade-in zoom-in duration-300">
+                  {getLangBadge(detectedLang)}
+                </span>
+              )}
+              {isTranslating && (
+                <span className="flex items-center text-xs text-muted-foreground animate-pulse">
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Translating...
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap w-full md:w-auto gap-2">
+            <div className="relative">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowTranslationMenu(!showTranslationMenu)}
+                className="gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 w-full sm:w-auto"
+                disabled={isTranslating}
+              >
+                <Globe className="w-4 h-4" />
+                <span className="hidden sm:inline">Translate</span>
+              </Button>
+              {showTranslationMenu && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-200">
+                  {translationOptions.map((lang) => (
+                    <button
+                      key={lang}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                      onClick={() => handleTranslate(lang)}
+                    >
+                      {lang}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <Button variant="outline" size="sm" onClick={handleCopy} className="gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-1 sm:flex-none">
+              {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            </Button>
+            
+            <Button variant="outline" size="sm" onClick={handleDownload} className="gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-1 sm:flex-none" title="Download Markdown">
+              <Download className="w-4 h-4" />
+            </Button>
+            
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handleExportNotion} 
+              className="gap-2 transition-all hover:scale-[1.02] shadow-md flex-1 sm:flex-none bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              disabled={isExporting}
+            >
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              <span className="hidden sm:inline">Notion</span>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 sm:p-6 text-left prose prose-zinc dark:prose-invert max-w-none prose-sm sm:prose-base prose-headings:font-bold prose-h2:text-primary prose-a:text-primary hover:prose-a:text-primary/80 overflow-x-auto w-full">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {displayMarkdown}
+          </ReactMarkdown>
+        </CardContent>
+      </Card>
+
+      {/* Notion Settings Modal */}
+      {showNotionModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <Settings className="w-5 h-5 text-zinc-500" />
+                Notion Integration
+              </h3>
+              <button 
+                onClick={() => setShowNotionModal(false)}
+                className="text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Internal Integration Token</label>
+                <p className="text-xs text-zinc-500 mb-2">Create an integration at <a href="https://www.notion.so/my-integrations" target="_blank" rel="noreferrer" className="text-primary hover:underline">my-integrations</a>, copy the secret token, and share your target page with this integration.</p>
+                <input 
+                  type="password"
+                  value={notionToken}
+                  onChange={(e) => setNotionToken(e.target.value)}
+                  placeholder="secret_..."
+                  className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-transparent focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Notion Page ID or URL</label>
+                <p className="text-xs text-zinc-500 mb-2">The ID or full link of the page where the notes should be sent.</p>
+                <input 
+                  type="text"
+                  value={notionPageId}
+                  onChange={(e) => setNotionPageId(e.target.value)}
+                  placeholder="e.g. 1a2b3c4d5e6f4789b9c0d... or full URL"
+                  className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-transparent focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="mt-8 flex gap-3 justify-end items-center">
+              <Button variant="ghost" onClick={() => setShowNotionModal(false)}>Cancel</Button>
+              <Button onClick={saveNotionSettings} disabled={isExporting}>
+                {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                Save & Export
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="flex w-full sm:w-auto gap-2">
-          <Button variant="outline" size="sm" onClick={handleCopy} className="flex-1 sm:flex-none gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800">
-            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-            {copied ? "Copied" : "Copy"}
-          </Button>
-          <Button variant="default" size="sm" onClick={handleDownload} className="flex-1 sm:flex-none gap-2 transition-all hover:scale-[1.02] shadow-md">
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Download .md</span>
-            <span className="sm:hidden">Download</span>
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 sm:p-6 text-left prose prose-zinc dark:prose-invert max-w-none prose-sm sm:prose-base prose-headings:font-bold prose-h2:text-primary prose-a:text-primary hover:prose-a:text-primary/80 overflow-x-auto w-full">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {displayMarkdown}
-        </ReactMarkdown>
-      </CardContent>
-    </Card>
+      )}
+    </>
   );
 }
