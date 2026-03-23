@@ -16,25 +16,55 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid YouTube URL" }, { status: 400 });
     }
 
-    const pageRes = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    let captionTracks;
+
+    // --- STEP 1: Try InnerTube API (Mimic Android - More stable) ---
+    try {
+      const innerTubeRes = await fetch("https://www.youtube.com/youtubei/v1/player?prettyPrint=false", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "com.google.android.youtube/19.10.38 (Linux; U; Android 14)"
+        },
+        body: JSON.stringify({
+          context: {
+            client: { clientName: "ANDROID", clientVersion: "19.10.38" }
+          },
+          videoId: videoId
+        })
+      });
+
+      if (innerTubeRes.ok) {
+        const json = await innerTubeRes.json();
+        captionTracks = json.captions?.playerCaptionsTracklistRenderer?.captionTracks;
       }
-    });
+    } catch (e) {
+      console.warn("InnerTube fetch failed, falling back to HTML scraping", e);
+    }
 
-    if (!pageRes.ok) throw new Error("Could not fetch YouTube page");
-    const html = await pageRes.text();
+    // --- STEP 2: Fallback to HTML Scraping ---
+    if (!captionTracks || !Array.isArray(captionTracks) || captionTracks.length === 0) {
+      const pageRes = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+      });
 
-    const playerResponseMatch = html.match(/var ytInitialPlayerResponse = ({.+?});/);
-    if (!playerResponseMatch) throw new Error("Could not find transcript data in page");
-
-    const playerResponse = JSON.parse(playerResponseMatch[1]);
-    const captionTracks = playerResponse.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+      if (pageRes.ok) {
+        const html = await pageRes.text();
+        const playerResponseMatch = html.match(/var ytInitialPlayerResponse = ({.+?});/);
+        if (playerResponseMatch) {
+          const playerResponse = JSON.parse(playerResponseMatch[1]);
+          captionTracks = playerResponse.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+        }
+      }
+    }
 
     if (!captionTracks || !Array.isArray(captionTracks) || captionTracks.length === 0) {
       throw new Error("Transcript is disabled on this video");
     }
 
+    // 3. Find the best transcript
     let selectedTrack = captionTracks.find((t: any) => t.languageCode === 'id' && t.kind !== 'asr') ||
                         captionTracks.find((t: any) => t.languageCode === 'id') ||
                         captionTracks.find((t: any) => t.languageCode === 'en') ||
