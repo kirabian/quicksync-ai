@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -18,6 +19,8 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "QuickSync AI",
   description: "Convert PDFs and text into Notion/Trello notes in 10 seconds using AI.",
+  manifest: "/manifest.json",
+  themeColor: "#8b5cf6"
 };
 
 export default function RootLayout({
@@ -50,6 +53,7 @@ export default function RootLayout({
             </main>
           </div>
           <Toaster position="bottom-right" richColors />
+          <OfflineIndicator />
         </ThemeProvider>
       </body>
     </html>

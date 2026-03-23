@@ -4,14 +4,27 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Download, Check, Globe, Send, Loader2, X, Settings } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Copy, Download, Check, Globe, Send, Loader2, X, Settings, Volume2, VolumeX, History, Printer, Calendar, Trello, Link as LinkIcon } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import LZString from "lz-string";
 
 export default function ResultView({ markdown }: { markdown: string }) {
   const [copied, setCopied] = useState(false);
+  
+  // Storage for Version translation history
+  const [originalMarkdown, setOriginalMarkdown] = useState(markdown);
   const [currentMarkdown, setCurrentMarkdown] = useState(markdown);
+  const [isTranslated, setIsTranslated] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
+
+  // Typewriter states
+  const [renderText, setRenderText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // TTS states
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   // Notion state
   const [showNotionModal, setShowNotionModal] = useState(false);
@@ -21,12 +34,19 @@ export default function ResultView({ markdown }: { markdown: string }) {
   const [showTranslationMenu, setShowTranslationMenu] = useState(false);
 
   useEffect(() => {
+    setOriginalMarkdown(markdown);
     setCurrentMarkdown(markdown);
+    setIsTranslated(false);
   }, [markdown]);
 
   useEffect(() => {
     setNotionToken(localStorage.getItem("notionToken") || "");
     setNotionPageId(localStorage.getItem("notionPageId") || "");
+    
+    // Cleanup TTS on unmount
+    return () => {
+      window.speechSynthesis.cancel();
+    };
   }, []);
 
   // Parse language tag
@@ -38,6 +58,48 @@ export default function ResultView({ markdown }: { markdown: string }) {
     detectedLang = langMatch[1].toUpperCase();
     displayMarkdown = currentMarkdown.replace(/^\[LANG:[A-Za-z]+\]\s*/, "");
   }
+
+  // Typewriter Effect Logic
+  useEffect(() => {
+    if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+    
+    setRenderText("");
+    setIsTyping(true);
+    let i = 0;
+    typingIntervalRef.current = setInterval(() => {
+      setRenderText(displayMarkdown.substring(0, i));
+      i += 3; // speed multiplier
+      if (i > displayMarkdown.length) {
+        setRenderText(displayMarkdown);
+        if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+        setIsTyping(false);
+      }
+    }, 10);
+
+    return () => {
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+    };
+  }, [displayMarkdown]);
+
+  const handlePlayAudio = () => {
+    if (isPlayingAudio) {
+      window.speechSynthesis.cancel();
+      setIsPlayingAudio(false);
+      return;
+    }
+
+    const textToRead = displayMarkdown.replace(/#/g, "").replace(/\*/g, "");
+    const utterance = new SpeechSynthesisUtterance(textToRead);
+    
+    if (detectedLang === "ID") utterance.lang = "id-ID";
+    else if (detectedLang === "JA") utterance.lang = "ja-JP";
+    else if (detectedLang === "ES") utterance.lang = "es-ES";
+    else utterance.lang = "en-US";
+
+    utterance.onend = () => setIsPlayingAudio(false);
+    window.speechSynthesis.speak(utterance);
+    setIsPlayingAudio(true);
+  };
 
   const getLangBadge = (code: string) => {
     switch (code) {
@@ -72,6 +134,37 @@ export default function ResultView({ markdown }: { markdown: string }) {
     toast.success("Downloaded successfully!");
   };
 
+  const handleShareLink = () => {
+    // We include the language tag if present so the recipient sees the correct language formatting
+    const contentToEncode = detectedLang ? `[LANG:${detectedLang}] ${displayMarkdown}` : displayMarkdown;
+    const encoded = LZString.compressToEncodedURIComponent(contentToEncode);
+    const shareUrl = `${window.location.origin}/?share=${encoded}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast.success("Collaboration link copied! Anyone with the link can view this document.");
+  };
+
+  const handlePrintPdf = () => {
+    window.print();
+  };
+
+  const handleGoogleCalendar = () => {
+    const url = new URL('https://calendar.google.com/calendar/render');
+    url.searchParams.append('action', 'TEMPLATE');
+    url.searchParams.append('text', 'Meeting from QuickSync AI');
+    url.searchParams.append('details', displayMarkdown.substring(0, 500)); // Truncate
+    window.open(url.toString(), '_blank');
+  };
+
+  const handleJiraTicket = () => {
+    const title = encodeURIComponent('Task from QuickSync AI');
+    const desc = encodeURIComponent(displayMarkdown.substring(0, 1000));
+    // A standard Jira URL schema used by many organizations to pre-fill standard ticket creation
+    // Assuming standard paths
+    const url = `https://your-domain.atlassian.net/secure/CreateIssueDetails!init.jspa?pid=10000&issuetype=10001&summary=${title}&description=${desc}`;
+    window.open(url, '_blank');
+    toast.info("Opened Jira ticket template. Replace 'your-domain' in URL with your real workspace.");
+  };
+
   const handleTranslate = async (langName: string) => {
     setShowTranslationMenu(false);
     setIsTranslating(true);
@@ -84,12 +177,18 @@ export default function ResultView({ markdown }: { markdown: string }) {
       if (!res.ok) throw new Error("Translation failed");
       const data = await res.json();
       setCurrentMarkdown(data.result);
+      setIsTranslated(true);
       toast.success(`Translated to ${langName}`);
     } catch (err: any) {
       toast.error(err.message || "Translation error");
     } finally {
       setIsTranslating(false);
     }
+  };
+
+  const handleRevertLanguage = () => {
+    setCurrentMarkdown(originalMarkdown);
+    setIsTranslated(false);
   };
 
   const saveNotionSettings = () => {
@@ -132,13 +231,39 @@ export default function ResultView({ markdown }: { markdown: string }) {
 
   return (
     <>
-      <Card className="w-full max-w-4xl mx-auto mt-8 shadow-xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur border-zinc-200 dark:border-zinc-800 transition-all overflow-hidden relative">
-        <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b space-y-0">
+      <div className="w-full flex justify-center gap-2 mb-4 print:hidden px-4 max-w-4xl mx-auto flex-wrap animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <Button variant="outline" size="sm" onClick={handleShareLink} className="gap-2 text-indigo-600 hover:text-indigo-600 hover:bg-indigo-600/10 transition-colors border-indigo-600/20 shadow-sm font-semibold">
+          <LinkIcon className="w-4 h-4" /> Share Link
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleGoogleCalendar} className="gap-2 text-primary hover:text-primary hover:bg-primary/10 transition-colors border-primary/20">
+          <Calendar className="w-4 h-4" /> Google Calendar
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleJiraTicket} className="gap-2 text-blue-600 hover:text-blue-600 hover:bg-blue-600/10 transition-colors border-blue-600/20">
+          <Trello className="w-4 h-4" /> Create Jira Ticket
+        </Button>
+        <Button variant="outline" size="sm" onClick={handlePrintPdf} className="gap-2 transition-colors">
+          <Printer className="w-4 h-4" /> Print / PDF
+        </Button>
+      </div>
+
+      <Card className="w-full max-w-4xl mx-auto shadow-xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur border-zinc-200 dark:border-zinc-800 transition-all overflow-hidden relative print:shadow-none print:border-none print:bg-white">
+        <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b print:border-b-2 print:border-black space-y-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <CardTitle className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-              Your Processed Notes
+            <CardTitle className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600 print:text-black flex items-center gap-2">
+              <span className="print:hidden">Your Processed Notes</span>
+              <span className="hidden print:inline font-bold text-2xl">QuickSync AI Report</span>
+              
+              {isPlayingAudio ? (
+                <button onClick={handlePlayAudio} className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors print:hidden" title="Stop Audio">
+                  <VolumeX className="w-4 h-4 animate-pulse" />
+                </button>
+              ) : (
+                <button onClick={handlePlayAudio} className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors print:hidden" title="Read Aloud">
+                  <Volume2 className="w-4 h-4" />
+                </button>
+              )}
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 print:hidden">
               {detectedLang && (
                 <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold leading-none bg-primary/10 text-primary border border-primary/20 shadow-sm animate-in fade-in zoom-in duration-300">
                   {getLangBadge(detectedLang)}
@@ -149,9 +274,14 @@ export default function ResultView({ markdown }: { markdown: string }) {
                   <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Translating...
                 </span>
               )}
+              {isTranslated && !isTranslating && (
+                <button onClick={handleRevertLanguage} className="flex items-center text-xs text-zinc-500 hover:text-primary transition-colors hover:underline">
+                  <History className="w-3 h-3 mr-1" /> Original
+                </button>
+              )}
             </div>
           </div>
-          <div className="flex flex-wrap w-full md:w-auto gap-2">
+          <div className="flex flex-wrap w-full md:w-auto gap-2 print:hidden">
             <div className="relative">
               <Button 
                 variant="outline" 
@@ -198,16 +328,19 @@ export default function ResultView({ markdown }: { markdown: string }) {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 text-left prose prose-zinc dark:prose-invert max-w-none prose-sm sm:prose-base prose-headings:font-bold prose-h2:text-primary prose-a:text-primary hover:prose-a:text-primary/80 overflow-x-auto w-full">
+        <CardContent className="p-4 sm:p-6 text-left prose prose-zinc dark:prose-invert max-w-none prose-sm sm:prose-base prose-headings:font-bold prose-h2:text-primary prose-a:text-primary hover:prose-a:text-primary/80 overflow-x-auto w-full print:text-black print:prose-headings:text-black">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {displayMarkdown}
+            {renderText}
           </ReactMarkdown>
+          {isTyping && (
+            <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1 align-middle rounded-sm print:hidden"></span>
+          )}
         </CardContent>
       </Card>
 
       {/* Notion Settings Modal */}
       {showNotionModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 print:hidden">
           <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold flex items-center gap-2">

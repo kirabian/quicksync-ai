@@ -3,7 +3,7 @@ import { model } from "@/lib/gemini";
 
 export async function POST(req: Request) {
   try {
-    const { text } = await req.json();
+    const { text, role } = await req.json();
 
     if (!text) {
       return NextResponse.json(
@@ -12,7 +12,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const systemInstruction = `Kamu adalah "QuickSync AI", asisten produktivitas tingkat tinggi yang spesialis dalam mengekstraksi informasi dari dokumen PDF dan teks mentah.
+    const roleInstruction = role && role !== "Umum" 
+      ? `\n\nPERAN ANDA: Bertindaklah sebagai seorang profesional di bidang ${role.toUpperCase()}. Gunakan gaya bahasa, istilah spesifik (jargon), dan sudut pandang yang sangat relevan dan disukai oleh seorang ${role}.` 
+      : "";
+
+    const systemInstruction = `Kamu adalah "QuickSync AI", asisten produktivitas tingkat tinggi yang spesialis dalam mengekstraksi informasi dari dokumen PDF dan teks mentah.${roleInstruction}
 
 TUGAS UTAMA:
 1. Identifikasi bahasa utama dari dokumen yang diinput user.

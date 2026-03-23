@@ -1,24 +1,39 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Uploader from "@/components/Uploader";
 import ResultView from "@/components/ResultView";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
+import LZString from "lz-string";
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   const [resultMarkdown, setResultMarkdown] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    const shareParam = searchParams.get("share");
+    if (shareParam) {
+      try {
+        const decoded = LZString.decompressFromEncodedURIComponent(shareParam);
+        if (decoded) {
+          setResultMarkdown(decoded);
+          toast.success("Loaded shared collaborative document!");
+        }
+      } catch (e) {
+        toast.error("Invalid share link or corrupted data.");
+      }
+    }
+  }, [searchParams]);
 
-  const handleProcessText = async (text: string) => {
+  const handleProcessText = async (text: string, role: string = "Umum") => {
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, role }),
       });
 
       if (!response.ok) {
@@ -92,5 +107,19 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="w-full flex-1 flex items-center justify-center min-h-[50vh]">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        </div>
+      }
+    >
+      <HomeContent />
+    </Suspense>
   );
 }

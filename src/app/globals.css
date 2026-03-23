@@ -129,3 +129,14 @@
     @apply font-sans;
   }
 }
+
+.prose strong {
+  background: linear-gradient(104deg, rgba(255,255,0,0) 0.9%, rgba(255,236,120,0.85) 2.4%, rgba(255,221,4,0.5) 5.8%, rgba(255,236,120,0.85) 93%, rgba(255,255,0,0) 96%);
+  padding: 0 0.2em;
+  border-radius: 0.2em;
+  color: inherit;
+}
+
+.dark .prose strong {
+  background: linear-gradient(104deg, rgba(236,72,153,0) 0.9%, rgba(236,72,153,0.4) 2.4%, rgba(219,39,119,0.3) 5.8%, rgba(236,72,153,0.4) 93%, rgba(236,72,153,0) 96%);
+}
