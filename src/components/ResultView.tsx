@@ -250,19 +250,21 @@ export default function ResultView({ markdown }: { markdown: string }) {
       <Card className="w-full max-w-4xl mx-auto shadow-xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur border-zinc-200 dark:border-zinc-800 transition-all overflow-hidden relative print:shadow-none print:border-none print:bg-white">
         <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b print:border-b-2 print:border-black space-y-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <CardTitle className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600 print:text-black flex items-center gap-2">
+            <CardTitle className="text-lg sm:text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600 print:text-black flex items-center gap-2 flex-wrap">
               <span className="print:hidden">Your Processed Notes</span>
               <span className="hidden print:inline font-bold text-2xl">QuickSync AI Report</span>
               
-              {isPlayingAudio ? (
-                <button onClick={handlePlayAudio} className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors print:hidden" title="Stop Audio">
-                  <VolumeX className="w-4 h-4 animate-pulse" />
-                </button>
-              ) : (
-                <button onClick={handlePlayAudio} className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors print:hidden" title="Read Aloud">
-                  <Volume2 className="w-4 h-4" />
-                </button>
-              )}
+              <div className="flex items-center">
+                {isPlayingAudio ? (
+                  <button onClick={handlePlayAudio} className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors print:hidden" title="Stop Audio">
+                    <VolumeX className="w-4 h-4 animate-pulse" />
+                  </button>
+                ) : (
+                  <button onClick={handlePlayAudio} className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors print:hidden" title="Read Aloud">
+                    <Volume2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </CardTitle>
             <div className="flex items-center gap-2 print:hidden">
               {detectedLang && (
@@ -282,20 +284,20 @@ export default function ResultView({ markdown }: { markdown: string }) {
               )}
             </div>
           </div>
-          <div className="flex flex-wrap w-full md:w-auto gap-2 print:hidden">
-            <div className="relative">
+          <div className="flex flex-wrap w-full lg:w-auto gap-2 print:hidden items-center justify-center md:justify-end">
+            <div className="relative w-full sm:w-auto">
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => setShowTranslationMenu(!showTranslationMenu)}
-                className="gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 w-full sm:w-auto"
+                className="gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 w-full"
                 disabled={isTranslating}
               >
                 <Globe className="w-4 h-4" />
-                <span className="hidden sm:inline">Translate</span>
+                <span>Translate</span>
               </Button>
               {showTranslationMenu && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-full right-0 mt-2 w-full sm:w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-200">
                   {translationOptions.map((lang) => (
                     <button
                       key={lang}
@@ -309,23 +311,25 @@ export default function ResultView({ markdown }: { markdown: string }) {
               )}
             </div>
             
-            <Button variant="outline" size="sm" onClick={handleCopy} className="gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-1 sm:flex-none">
-              {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-            </Button>
-            
-            <Button variant="outline" size="sm" onClick={handleDownload} className="gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-1 sm:flex-none" title="Download Markdown">
-              <Download className="w-4 h-4" />
-            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" onClick={handleCopy} className="gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-1">
+                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+              </Button>
+              
+              <Button variant="outline" size="sm" onClick={handleDownload} className="gap-2 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-1" title="Download Markdown">
+                <Download className="w-4 h-4" />
+              </Button>
+            </div>
             
             <Button 
               variant="default" 
               size="sm" 
               onClick={handleExportNotion} 
-              className="gap-2 transition-all hover:scale-[1.02] shadow-md flex-1 sm:flex-none bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              className="gap-2 transition-all hover:scale-[1.02] shadow-md w-full sm:w-auto bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
               disabled={isExporting}
             >
               {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              <span className="hidden sm:inline">Notion</span>
+              <span>Notion</span>
             </Button>
           </div>
         </CardHeader>

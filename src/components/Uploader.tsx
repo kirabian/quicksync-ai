@@ -126,34 +126,36 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
 
       <CardContent className="p-6">
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="flex flex-1 gap-1 bg-zinc-100/50 dark:bg-zinc-800/50 p-1 rounded-lg text-sm overflow-x-auto">
-            <Button 
-              variant={activeTab === "file" ? "default" : "ghost"} 
-              className="flex-1 transition-all px-2 whitespace-nowrap"
-              onClick={() => setActiveTab("file")}
-              disabled={isProcessing}
-            >
-              <FileUp className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">PDF</span>
-            </Button>
-            <Button 
-              variant={activeTab === "text" ? "default" : "ghost"} 
-              className="flex-1 transition-all px-2 whitespace-nowrap"
-              onClick={() => setActiveTab("text")}
-              disabled={isProcessing}
-            >
-              <Type className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Text</span>
-            </Button>
-            <Button 
-              variant={activeTab === "url" ? "default" : "ghost"} 
-              className="flex-1 transition-all px-2 whitespace-nowrap"
-              onClick={() => setActiveTab("url")}
-              disabled={isProcessing}
-            >
-              <LinkIcon className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Link / YT</span>
-            </Button>
+          <div className="flex flex-col sm:flex-row flex-1 gap-2 bg-zinc-100/50 dark:bg-zinc-800/50 p-1 rounded-lg text-sm">
+            <div className="flex flex-1 gap-1">
+              <Button 
+                variant={activeTab === "file" ? "default" : "ghost"} 
+                className="flex-1 transition-all px-2 whitespace-nowrap h-9 sm:h-10"
+                onClick={() => setActiveTab("file")}
+                disabled={isProcessing}
+              >
+                <FileUp className="w-4 h-4 mr-2" />
+                <span>PDF</span>
+              </Button>
+              <Button 
+                variant={activeTab === "text" ? "default" : "ghost"} 
+                className="flex-1 transition-all px-2 whitespace-nowrap h-9 sm:h-10"
+                onClick={() => setActiveTab("text")}
+                disabled={isProcessing}
+              >
+                <Type className="w-4 h-4 mr-2" />
+                <span>Text</span>
+              </Button>
+              <Button 
+                variant={activeTab === "url" ? "default" : "ghost"} 
+                className="flex-1 transition-all px-2 whitespace-nowrap h-9 sm:h-10"
+                onClick={() => setActiveTab("url")}
+                disabled={isProcessing}
+              >
+                <LinkIcon className="w-4 h-4 mr-2" />
+                <span>Link / YT</span>
+              </Button>
+            </div>
           </div>
           
           <div className="relative flex items-center bg-zinc-100/50 dark:bg-zinc-800/50 rounded-lg p-1 px-3">
