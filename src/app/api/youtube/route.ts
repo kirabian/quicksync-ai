@@ -17,9 +17,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ text: fullText });
   } catch (error: any) {
     console.error("YouTube Transcript Error:", error);
+    
+    let errorMessage = "Gagal mengambil teks dari video YouTube.";
+    if (error.message?.includes("Transcript is disabled")) {
+      errorMessage = "Video ini tidak memiliki subtitle/CC aktif. Silakan cari video lain yang memiliki subtitle.";
+    } else if (error.message?.includes("No video id found")) {
+      errorMessage = "URL video YouTube tidak valid.";
+    }
+
     return NextResponse.json(
-      { error: "Failed to fetch YouTube transcript", details: error.message },
-      { status: 500 }
+      { error: "Failed to fetch YouTube transcript", details: errorMessage },
+      { status: 400 }
     );
   }
 }
