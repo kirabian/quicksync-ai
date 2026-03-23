@@ -5,5 +5,5 @@ if (!process.env.GEMINI_API_KEY) {
 }
 
 export const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-// Menggunakan gemini-1.5-flash-latest untuk kompatibilitas paling stabil di semua region.
-export const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+// Berdasarkan diagnosa, ID ini valid di akunmu dan punya kuota 500 per hari di Vercel.
+export const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
