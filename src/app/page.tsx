@@ -26,7 +26,7 @@ export default function Home() {
         try {
           const errData = await response.json();
           errStr = errData.details ? `${errData.details}` : errData.error;
-        } catch (e) {}
+        } catch (e) { }
         throw new Error(errStr);
       }
 
@@ -54,7 +54,7 @@ export default function Home() {
           Turn documents into <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">actionable knowledge</span> in seconds
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground mb-8 text-balance">
-          QuickSync AI uses Gemini 1.5 Flash to summarize your PDFs and raw text into Notion/Trello ready notes, extracting action items and creating a professional draft instantly.
+          QuickSync AI uses Gemini 2.5 Flash to summarize your PDFs and raw text into Notion/Trello ready notes, extracting action items and creating a professional draft instantly.
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export default function Home() {
           <Uploader onProcessText={handleProcessText} />
         ) : (
           <div className="w-full flex flex-col items-center">
-            <button 
+            <button
               onClick={() => setResultMarkdown(null)}
               className="mb-6 text-sm font-medium text-muted-foreground hover:text-primary transition-colors hover:underline"
             >
@@ -83,7 +83,7 @@ export default function Home() {
         <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-md">
           <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary text-xl font-bold">2</div>
           <h3 className="font-semibold mb-2 font-heading">AI Processing</h3>
-          <p className="text-sm text-muted-foreground">Gemini 1.5 Flash reads and builds a structured summary instantly.</p>
+          <p className="text-sm text-muted-foreground">Gemini 2.5 Flash reads and builds a structured summary instantly.</p>
         </div>
         <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-md">
           <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary text-xl font-bold">3</div>
