@@ -8,8 +8,8 @@ export const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 // Primary model (Lite/experimental)
 export const model31 = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-// Fallback model (Stable/production - using 'latest' alias for reliability)
-export const model15 = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+// Fallback model (Stable/production - using 2.0 as it is verified available)
+export const model15 = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 /**
  * Executes a prompt with automatic fallback and retry logic
