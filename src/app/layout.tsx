@@ -41,10 +41,19 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="flex flex-col min-h-screen">
-            <header className="py-4 px-6 md:px-12 flex items-center justify-between border-b bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md sticky top-0 z-50">
-              <h1 className="text-xl font-bold font-heading tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">QuickSync AI</h1>
-              <nav className="flex items-center gap-4">
-                <a href="https://github.com/kirabian/quicksync-ai" target="_blank" rel="noreferrer" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Star on GitHub</a>
+            <header className="py-3 px-6 md:px-12 flex items-center justify-between border-b bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md sticky top-0 z-50 shadow-sm transition-all">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold font-heading tracking-tight text-primary">QuickSync AI</h1>
+              </div>
+              <nav className="flex items-center gap-3 sm:gap-4">
+                <a 
+                  href="https://github.com/kirabian/quicksync-ai" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center"
+                >
+                  <span className="hidden sm:inline">Star on </span>GitHub
+                </a>
                 <ThemeToggle />
               </nav>
             </header>
