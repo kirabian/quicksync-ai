@@ -164,6 +164,16 @@ export default function ResultView({ markdown }: { markdown: string }) {
     toast.success("Collaboration link copied!");
   };
 
+  const handleWhatsAppShare = () => {
+    const text = encodeURIComponent(`*QuickSync AI Summary*\n\n${displayMarkdown.substring(0, 1000)}... \n\nCheck full details here: ${window.location.href}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
+  const handleTelegramShare = () => {
+    const text = encodeURIComponent(`QuickSync AI Summary:\n\n${displayMarkdown.substring(0, 1000)}...`);
+    window.open(`https://t.me/share/url?url=${window.location.href}&text=${text}`, '_blank');
+  };
+
   const handleGoogleCalendar = () => {
     const url = new URL('https://calendar.google.com/calendar/render');
     url.searchParams.append('action', 'TEMPLATE');
@@ -238,12 +248,18 @@ export default function ResultView({ markdown }: { markdown: string }) {
 
   return (
     <>
-      <div className="w-full flex justify-center gap-2 mb-4 print:hidden px-4 max-w-4xl mx-auto flex-wrap animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <Button variant="outline" size="sm" onClick={handleShareLink} className="gap-2 text-indigo-600 hover:text-indigo-600 hover:bg-indigo-600/10 transition-colors border-indigo-600/20 shadow-sm font-semibold">
-          <LinkIcon className="w-4 h-4" /> Share Link
+      <div className="w-full flex justify-center gap-2 mb-4 print:hidden px-4 max-w-4xl mx-auto flex-wrap animate-in fade-in slide-in-from-bottom-2 duration-500" role="group" aria-label="Share and Calendar Actions">
+        <Button variant="outline" size="sm" onClick={handleShareLink} className="gap-2 text-indigo-600 hover:text-indigo-600 hover:bg-indigo-600/10 transition-colors border-indigo-600/20 shadow-sm font-semibold" aria-label="Copy collaboration link">
+          <LinkIcon className="w-4 h-4" aria-hidden="true" /> Share Link
         </Button>
-        <Button variant="outline" size="sm" onClick={handleGoogleCalendar} className="gap-2 text-primary hover:text-primary hover:bg-primary/10 transition-colors border-primary/20">
-          <Calendar className="w-4 h-4" /> Google Calendar
+        <Button variant="outline" size="sm" onClick={handleWhatsAppShare} className="gap-2 text-green-600 hover:text-green-600 hover:bg-green-600/10 transition-colors border-green-600/20" aria-label="Share via WhatsApp">
+          <Send className="w-4 h-4" aria-hidden="true" /> WhatsApp
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleTelegramShare} className="gap-2 text-sky-500 hover:text-sky-500 hover:bg-sky-500/10 transition-colors border-sky-500/20" aria-label="Share via Telegram">
+          <Send className="w-4 h-4" aria-hidden="true" /> Telegram
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleGoogleCalendar} className="gap-2 text-primary hover:text-primary hover:bg-primary/10 transition-colors border-primary/20" aria-label="Add to Google Calendar">
+          <Calendar className="w-4 h-4" aria-hidden="true" /> Calendar
         </Button>
       </div>
 
@@ -256,12 +272,22 @@ export default function ResultView({ markdown }: { markdown: string }) {
               
               <div className="flex items-center">
                 {isPlayingAudio ? (
-                  <button onClick={handlePlayAudio} className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors print:hidden" title="Stop Audio">
-                    <VolumeX className="w-4 h-4 animate-pulse" />
+                  <button 
+                    onClick={handlePlayAudio} 
+                    className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors print:hidden" 
+                    title="Stop Audio"
+                    aria-label="Stop reading aloud"
+                  >
+                    <VolumeX className="w-4 h-4 animate-pulse" aria-hidden="true" />
                   </button>
                 ) : (
-                  <button onClick={handlePlayAudio} className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors print:hidden" title="Read Aloud">
-                    <Volume2 className="w-4 h-4" />
+                  <button 
+                    onClick={handlePlayAudio} 
+                    className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors print:hidden" 
+                    title="Read Aloud"
+                    aria-label="Read summary aloud"
+                  >
+                    <Volume2 className="w-4 h-4" aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -278,8 +304,12 @@ export default function ResultView({ markdown }: { markdown: string }) {
                 </span>
               )}
               {isTranslated && !isTranslating && (
-                <button onClick={handleRevertLanguage} className="flex items-center text-xs text-zinc-500 hover:text-primary transition-colors hover:underline">
-                  <History className="w-3 h-3 mr-1" /> Original
+                <button 
+                  onClick={handleRevertLanguage} 
+                  className="flex items-center text-xs text-zinc-500 hover:text-primary transition-colors hover:underline"
+                  aria-label="Revert to original language"
+                >
+                  <History className="w-3 h-3 mr-1" aria-hidden="true" /> Original
                 </button>
               )}
             </div>
@@ -327,13 +357,18 @@ export default function ResultView({ markdown }: { markdown: string }) {
               onClick={handleExportNotion} 
               className="gap-2 transition-all hover:scale-[1.02] shadow-md w-full sm:w-auto bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
               disabled={isExporting}
+              aria-label="Send Note to Notion"
             >
-              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              <span>Notion</span>
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Send className="w-4 h-4" aria-hidden="true" />}
+              <span>Send Note to Notion</span>
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 text-left prose prose-zinc dark:prose-invert max-w-none prose-sm sm:prose-base prose-headings:font-bold prose-h2:text-primary prose-a:text-primary hover:prose-a:text-primary/80 overflow-x-auto w-full print:text-black print:prose-headings:text-black">
+        <CardContent 
+          className="p-4 sm:p-6 text-left prose prose-zinc dark:prose-invert max-w-none prose-sm sm:prose-base prose-headings:font-bold prose-h2:text-primary prose-a:text-primary hover:prose-a:text-primary/80 overflow-x-auto w-full print:text-black print:prose-headings:text-black"
+          role="article"
+          aria-label="Summary Content"
+        >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {renderText}
           </ReactMarkdown>

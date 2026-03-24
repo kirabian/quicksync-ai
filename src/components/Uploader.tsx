@@ -130,13 +130,16 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex flex-col sm:flex-row flex-1 gap-2 bg-zinc-100/50 dark:bg-zinc-800/50 p-1 rounded-lg text-sm">
             <div className="flex flex-1 gap-1">
-              <Button 
+                <Button 
                 variant={activeTab === "file" ? "default" : "ghost"} 
                 className="flex-1 transition-all px-2 whitespace-nowrap h-9 sm:h-10"
                 onClick={() => setActiveTab("file")}
                 disabled={isProcessing}
+                aria-label="Upload PDF File"
+                aria-selected={activeTab === "file"}
+                role="tab"
               >
-                <FileUp className="w-4 h-4 mr-2" />
+                <FileUp className="w-4 h-4 mr-2" aria-hidden="true" />
                 <span>PDF</span>
               </Button>
               <Button 
@@ -144,8 +147,11 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
                 className="flex-1 transition-all px-2 whitespace-nowrap h-9 sm:h-10"
                 onClick={() => setActiveTab("text")}
                 disabled={isProcessing}
+                aria-label="Paste Raw Text"
+                aria-selected={activeTab === "text"}
+                role="tab"
               >
-                <Type className="w-4 h-4 mr-2" />
+                <Type className="w-4 h-4 mr-2" aria-hidden="true" />
                 <span>Text</span>
               </Button>
               <Button 
@@ -153,20 +159,24 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
                 className="flex-1 transition-all px-2 whitespace-nowrap h-9 sm:h-10"
                 onClick={() => setActiveTab("url")}
                 disabled={isProcessing}
+                aria-label="Process Web Link"
+                aria-selected={activeTab === "url"}
+                role="tab"
               >
-                <LinkIcon className="w-4 h-4 mr-2" />
+                <LinkIcon className="w-4 h-4 mr-2" aria-hidden="true" />
                 <span>Web Link</span>
               </Button>
             </div>
           </div>
           
           <div className="relative flex items-center bg-zinc-100/50 dark:bg-zinc-800/50 rounded-lg p-1 px-3">
-            <UserCircle className="w-4 h-4 text-muted-foreground mr-2" />
+            <UserCircle className="w-4 h-4 text-muted-foreground mr-2" aria-hidden="true" />
             <select 
               value={role} 
               onChange={(e) => setRole(e.target.value)}
               disabled={isProcessing}
               className="bg-transparent text-sm font-medium focus:outline-none appearance-none cursor-pointer text-foreground pr-4"
+              aria-label="Select Target Audience Role"
             >
               {roles.map(r => (
                 <option key={r} value={r} className="bg-white dark:bg-zinc-900 text-foreground">{r}</option>
@@ -180,16 +190,16 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
             {...getRootProps()} 
             className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 ${isDragActive ? "border-primary bg-primary/5 scale-[1.02]" : "border-muted-foreground/20 hover:border-primary/50"} ${isProcessing ? "opacity-50 pointer-events-none" : ""}`}
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} aria-label="Upload PDF file" />
             {isProcessing ? (
               <div className="flex flex-col items-center justify-center space-y-4">
-                <Loader2 className="w-10 h-10 mx-auto animate-spin text-primary" />
-                <div className="text-sm font-medium text-primary fade-in animate-in">
+                <Loader2 className="w-10 h-10 mx-auto animate-spin text-primary" aria-hidden="true" />
+                <div role="status" aria-live="polite" className="text-sm font-medium text-primary fade-in animate-in">
                   Processing {role}... estimated {Math.max(1, Math.floor((100 - progress) / 5))}s
                 </div>
               </div>
             ) : (
-              <FileUp className="w-10 h-10 mx-auto text-muted-foreground mb-4" />
+              <FileUp className="w-10 h-10 mx-auto text-muted-foreground mb-4" aria-hidden="true" />
             )}
             {!isProcessing && (
               <>
@@ -212,6 +222,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               disabled={isProcessing}
+              aria-label="Document text input"
             />
             <Button 
               className="w-full transition-all" 
