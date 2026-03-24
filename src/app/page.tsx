@@ -50,7 +50,10 @@ function HomeContent() {
       toast.success("Document processed successfully!");
     } catch (error: any) {
       console.error(error);
-      toast.error(error.message || "An error occurred while communicating with the AI. Please try again later.");
+      const is503 = error.message?.includes("503") || error.message?.includes("demand") || error.message?.includes("busy");
+      toast.error(is503 ? "AI is temporarily busy" : (error.message || "An error occurred"), {
+        description: is503 ? "High demand detected. Please wait 10 seconds and try again." : "Please check your document content or connection."
+      });
     }
   };
 
@@ -69,7 +72,7 @@ function HomeContent() {
           Turn documents into <span className="text-primary">actionable knowledge</span> in seconds
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground mb-8 text-balance">
-          QuickSync AI uses Gemini 2.5 Flash to summarize your PDFs and raw text into Notion/Trello ready notes, extracting action items and creating a professional draft instantly.
+          QuickSync AI uses Gemini Flash to summarize your PDFs and raw text into Notion/Trello ready notes, extracting action items and creating a professional draft instantly.
         </p>
       </div>
 

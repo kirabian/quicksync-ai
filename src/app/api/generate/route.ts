@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { model } from "@/lib/gemini";
+import { generateResilientContent } from "@/lib/gemini";
 
 export async function POST(req: Request) {
   try {
@@ -44,7 +44,7 @@ SPECIAL INSTRUCTIONS:
 
     const prompt = `${systemInstruction}\n\nDocument Text:\n${text}`;
 
-    const result = await model.generateContent(prompt);
+    const result = await generateResilientContent(prompt);
     const responseText = result.response.text();
 
     return NextResponse.json({ result: responseText });

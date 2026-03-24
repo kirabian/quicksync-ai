@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { model } from "@/lib/gemini";
+import { generateResilientContent } from "@/lib/gemini";
 
 export async function POST(req: Request) {
   try {
@@ -24,7 +24,7 @@ CRITICAL RULES:
 
     const prompt = `${systemInstruction}\n\nOriginal Text to Translate:\n${text}`;
 
-    const result = await model.generateContent(prompt);
+    const result = await generateResilientContent(prompt);
     const response = await result.response;
     const responseText = response.text();
 
