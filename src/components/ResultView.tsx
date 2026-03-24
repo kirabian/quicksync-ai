@@ -250,7 +250,7 @@ export default function ResultView({ markdown }: { markdown: string }) {
       <Card className="w-full max-w-4xl mx-auto shadow-xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur border-zinc-200 dark:border-zinc-800 transition-all overflow-hidden relative print:shadow-none print:border-none print:bg-white">
         <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b print:border-b-2 print:border-black space-y-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <CardTitle className="text-lg sm:text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600 print:text-black flex items-center gap-2 flex-wrap">
+            <CardTitle className="text-lg sm:text-xl font-semibold text-primary print:text-black flex items-center gap-2 flex-wrap">
               <span className="print:hidden">Your Processed Notes</span>
               <span className="hidden print:inline font-bold text-2xl">QuickSync AI Report</span>
               

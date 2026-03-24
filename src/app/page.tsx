@@ -28,7 +28,7 @@ function HomeContent() {
     }
   }, [searchParams]);
 
-  const handleProcessText = async (text: string, role: string = "Umum") => {
+  const handleProcessText = async (text: string, role: string = "General") => {
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -66,7 +66,7 @@ function HomeContent() {
     <div className="w-full flex-1 flex flex-col items-center py-12 px-4 md:py-24">
       <div className="text-center max-w-3xl mb-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
         <h1 className="text-4xl md:text-6xl font-extrabold font-heading tracking-tight mb-6 text-balance leading-tight">
-          Turn documents into <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">actionable knowledge</span> in seconds
+          Turn documents into <span className="text-primary">actionable knowledge</span> in seconds
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground mb-8 text-balance">
           QuickSync AI uses Gemini 2.5 Flash to summarize your PDFs and raw text into Notion/Trello ready notes, extracting action items and creating a professional draft instantly.

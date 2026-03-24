@@ -16,8 +16,8 @@ export async function POST(req: Request) {
 Your task is to translate the provided Markdown text into exactly this language: ${targetLanguage}.
 
 CRITICAL RULES:
-1. PENTING: Pada baris pertama output, berikan kode bahasa dalam format [LANG:XX], di mana XX adalah kode negara bahasa terjemahan (contoh: ID untuk Indonesia, JA untuk Jepang, EN untuk Inggris, ES untuk Spanyol).
-2. BARIS KEDUA DAN SETERUSNYA adalah teks terjemahan.
+1. IMPORTANT: On the first line of your output, provide the language code in the format [LANG:XX], where XX is the country code of the translation language (e.g., ID for Indonesia, JA for Japan, EN for English, ES for Spanish).
+2. THE SECOND LINE AND BEYOND is the translated text.
 3. PRESERVE ALL MARKDOWN FORMATTING. Do not change the structure, bolding (**text**), lists (- or 1.), or headings (##).
 4. Do not output anything other than the language tag and the translated markdown text. No conversational filler like "Here is the translation...".
 `;

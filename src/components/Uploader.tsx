@@ -6,7 +6,7 @@ import pdfToText from "react-pdftotext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileUp, Type, Loader2, UserCircle, Link as LinkIcon, Youtube, Globe } from "lucide-react";
+import { FileUp, Type, Loader2, UserCircle, Link as LinkIcon, Globe } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Uploader({ onProcessText }: { onProcessText: (text: string, role: string) => Promise<void> }) {
@@ -81,12 +81,14 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
       return;
     }
 
+    if (urlInput.includes("youtube.com") || urlInput.includes("youtu.be")) {
+      toast.error("YouTube links are no longer supported. Please use article or news links.");
+      return;
+    }
+
     try {
       setIsProcessing(true);
-      const isYoutube = urlInput.includes("youtube.com") || urlInput.includes("youtu.be");
-      const endpoint = isYoutube ? "/api/youtube" : "/api/scrape";
-      
-      const res = await fetch(endpoint, {
+      const res = await fetch("/api/scrape", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: urlInput }),
@@ -118,7 +120,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
       {isProcessing && (
         <div className="absolute top-0 left-0 h-1 bg-zinc-200 dark:bg-zinc-800 w-full z-10">
           <div 
-            className="h-full bg-gradient-to-r from-primary to-purple-600 transition-all duration-500 ease-out"
+            className="h-full bg-primary transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -153,7 +155,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
                 disabled={isProcessing}
               >
                 <LinkIcon className="w-4 h-4 mr-2" />
-                <span>Link / YT</span>
+                <span>Web Link</span>
               </Button>
             </div>
           </div>
@@ -183,7 +185,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
               <div className="flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-10 h-10 mx-auto animate-spin text-primary" />
                 <div className="text-sm font-medium text-primary fade-in animate-in">
-                  Memproses {role}... estimated {Math.max(1, Math.floor((100 - progress) / 5))}s
+                  Processing {role}... estimated {Math.max(1, Math.floor((100 - progress) / 5))}s
                 </div>
               </div>
             ) : (
@@ -219,7 +221,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
               {isProcessing ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Memproses {role} ({Math.floor(progress)}%)...
+                  Processing {role} ({Math.floor(progress)}%)...
                 </>
               ) : "Process Text"}
             </Button>
@@ -230,15 +232,11 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="relative">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                {urlInput.includes("youtu") ? (
-                  <Youtube className="w-5 h-5 text-red-500" />
-                ) : (
-                  <Globe className="w-5 h-5 text-muted-foreground" />
-                )}
+                <Globe className="w-5 h-5 text-muted-foreground" />
               </div>
               <input
                 type="url"
-                placeholder="https://youtube.com/... or https://kompas.com/..."
+                placeholder="Paste an article or news link here..."
                 className="w-full pl-10 pr-4 py-3 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-transparent focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
@@ -246,7 +244,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
               />
             </div>
             <p className="text-xs text-muted-foreground px-1">
-              Paste a URL to an article, blog post, or YouTube video to render a summary directly.
+              Paste a URL to an article or blog post to render a summary directly.
             </p>
             <Button 
               className="w-full transition-all" 
@@ -256,7 +254,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
               {isProcessing ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Mengunduh konten & Memproses ({Math.floor(progress)}%)...
+                  Downloading content & Processing ({Math.floor(progress)}%)...
                 </>
               ) : "Process URL"}
             </Button>
