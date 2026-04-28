@@ -1,128 +1,62 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import Uploader from "@/components/Uploader";
-import ResultView from "@/components/ResultView";
-import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
-import LZString from "lz-string";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import Hero from "@/components/landing/Hero";
+import HowItWorks from "@/components/landing/HowItWorks";
+import Features from "@/components/landing/Features";
+import WhoItsFor from "@/components/landing/WhoItsFor";
+import Pricing from "@/components/landing/Pricing";
+import Footer from "@/components/landing/Footer";
 
-function HomeContent() {
-  const searchParams = useSearchParams();
+export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
-  const [resultMarkdown, setResultMarkdown] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
-    const shareParam = searchParams.get("share");
-    if (shareParam) {
-      try {
-        const decoded = LZString.decompressFromEncodedURIComponent(shareParam);
-        if (decoded) {
-          setResultMarkdown(decoded);
-          toast.success("Loaded shared collaborative document!");
-        }
-      } catch (e) {
-        toast.error("Invalid share link or corrupted data.");
-      }
-    }
-  }, [searchParams]);
+  }, []);
 
-  const handleProcessText = async (text: string, role: string = "General") => {
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, role }),
-      });
-
-      if (!response.ok) {
-        let errStr = "Failed to process document";
-        try {
-          const errData = await response.json();
-          errStr = errData.details ? `${errData.details}` : errData.error;
-        } catch (e) { }
-        throw new Error(errStr);
-      }
-
-      const data = await response.json();
-      setResultMarkdown(data.result);
-      toast.success("Document processed successfully!");
-    } catch (error: any) {
-      console.error(error);
-      const is503 = error.message?.includes("503") || error.message?.includes("demand") || error.message?.includes("busy");
-      toast.error(is503 ? "AI is temporarily busy" : (error.message || "An error occurred"), {
-        description: is503 ? "High demand detected. Please wait 10 seconds and try again." : "Please check your document content or connection."
-      });
-    }
-  };
-
-  if (!mounted) {
-    return (
-      <div className="w-full flex-1 flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
+  if (!mounted) return null;
 
   return (
-    <div className="w-full flex-1 flex flex-col items-center py-12 px-4 md:py-24">
-      <div className="text-center max-w-3xl mb-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
-        <h1 className="text-4xl md:text-6xl font-extrabold font-heading tracking-tight mb-6 text-balance leading-tight">
-          Turn documents into <span className="text-primary">actionable knowledge</span> in seconds
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground mb-8 text-balance">
-          QuickSync AI uses Gemini Flash to summarize your PDFs and raw text into Notion/Trello ready notes, extracting action items and creating a professional draft instantly.
-        </p>
-      </div>
-
-      <div className="w-full animate-in fade-in slide-in-from-bottom-12 duration-1000">
-        {!resultMarkdown ? (
-          <Uploader onProcessText={handleProcessText} />
-        ) : (
-          <div className="w-full flex flex-col items-center">
-            <button
-              onClick={() => setResultMarkdown(null)}
-              className="mb-6 text-sm font-medium text-muted-foreground hover:text-primary transition-colors hover:underline"
+    <div className="bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
+      {/* Custom Cursor or other global micro-interactions could go here */}
+      
+      <nav className="fixed top-0 left-0 w-full z-[100] px-6 md:px-12 py-8 flex justify-between items-center mix-blend-difference">
+        <div className="flex items-center gap-2 group cursor-pointer">
+          <div className="w-8 h-8 bg-primary group-hover:rotate-90 transition-transform duration-500" />
+          <span className="text-2xl font-display font-black uppercase tracking-tighter text-white">QuickSync</span>
+        </div>
+        
+        <div className="hidden md:flex gap-12">
+          {["Features", "Pricing", "About"].map((item) => (
+            <a 
+              key={item} 
+              href={`#${item.toLowerCase()}`} 
+              className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50 hover:text-primary transition-colors"
             >
-              ← Process another document
-            </button>
-            <ResultView markdown={resultMarkdown} />
-          </div>
-        )}
-      </div>
+              {item}
+            </a>
+          ))}
+        </div>
+        
+        <button className="bg-white text-black px-6 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-colors">
+          Get Started
+        </button>
+      </nav>
 
-      <div className="mt-24 max-w-4xl grid md:grid-cols-3 gap-8 text-center px-4 animate-in fade-in duration-1000 delay-300">
-        <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-md">
-          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary text-xl font-bold">1</div>
-          <h3 className="font-semibold mb-2 font-heading">Upload or Paste</h3>
-          <p className="text-sm text-muted-foreground">Drop your PDF or paste raw text. QuickSync will extract the context.</p>
+      <main>
+        <Hero />
+        <div id="features">
+          <HowItWorks />
+          <Features />
         </div>
-        <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-md">
-          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary text-xl font-bold">2</div>
-          <h3 className="font-semibold mb-2 font-heading">AI Processing</h3>
-          <p className="text-sm text-muted-foreground">Gemini 2.5 Flash reads and builds a structured summary instantly.</p>
+        <WhoItsFor />
+        <div id="pricing">
+          <Pricing />
         </div>
-        <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-md">
-          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary text-xl font-bold">3</div>
-          <h3 className="font-semibold mb-2 font-heading">Sync & Share</h3>
-          <p className="text-sm text-muted-foreground">Copy the markdown directly to Notion, Trello, or download it as .md.</p>
-        </div>
-      </div>
+        <Footer />
+      </main>
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense 
-      fallback={
-        <div className="w-full flex-1 flex items-center justify-center min-h-[50vh]">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-        </div>
-      }
-    >
-      <HomeContent />
-    </Suspense>
   );
 }

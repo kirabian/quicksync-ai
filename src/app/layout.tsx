@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Syne, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 
-const inter = Inter({
-  variable: "--font-sans",
+
+
+const syne = Syne({
+  variable: "--font-display",
   subsets: ["latin"],
 });
 
 const outfit = Outfit({
-  variable: "--font-heading",
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -32,36 +34,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${outfit.variable} antialiased bg-zinc-50 dark:bg-zinc-950 font-sans`}
+        className={`${syne.variable} ${outfit.variable} antialiased bg-background text-foreground font-sans`}
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen">
-            <header className="py-3 px-6 md:px-12 flex items-center justify-between border-b bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md sticky top-0 z-50 shadow-sm transition-all" role="banner">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold font-heading tracking-tight text-primary" aria-label="QuickSync AI Home">QuickSync AI</h1>
-              </div>
-              <nav className="flex items-center gap-3 sm:gap-4" aria-label="Main Navigation">
-                <a 
-                  href="https://github.com/kirabian/quicksync-ai" 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center"
-                  aria-label="Star QuickSync AI on GitHub"
-                >
-                  <span className="hidden sm:inline">Star on </span>GitHub
-                </a>
-                <ThemeToggle />
-              </nav>
-            </header>
             <main className="flex-1 flex flex-col">
               {children}
             </main>
-          </div>
           <Toaster position="bottom-right" richColors />
           <OfflineIndicator />
         </ThemeProvider>
