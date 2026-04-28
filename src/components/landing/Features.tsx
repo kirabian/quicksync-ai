@@ -1,93 +1,78 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Share2, Zap, Database, MessageSquare, Speaker } from "lucide-react";
+import { Zap, Database, MessageSquare, Share2, Speaker } from "lucide-react";
 
 const features = [
   {
     title: "Surgical Summary",
-    desc: "Not just a recap. A structured breakdown of themes, sentiment, and core arguments.",
+    desc: "A high-fidelity breakdown of themes, sentiment, and core arguments.",
     icon: Zap,
-    size: "lg:col-span-8",
-    color: "bg-foreground/5"
+    span: "md:col-span-2"
   },
   {
-    title: "Action Extraction",
-    desc: "Automatically identifies deadlines and owners. Syncs directly to your calendar.",
+    title: "Action Items",
+    desc: "Automated extraction of deadlines and ownership from any text.",
     icon: Database,
-    size: "lg:col-span-4",
-    color: "bg-primary/5"
+    span: "md:col-span-1"
   },
   {
     title: "Pro Drafts",
-    desc: "Need a follow-up email or a formal letter? We draft it based on the document context.",
+    desc: "Generate professional follow-up emails and formal letters instantly.",
     icon: MessageSquare,
-    size: "lg:col-span-4",
-    color: "bg-foreground/5"
+    span: "md:col-span-1"
   },
   {
     title: "Universal Sync",
-    desc: "One click to Notion, Telegram, or WhatsApp. Your knowledge, everywhere.",
+    desc: "One-click export to Notion, Telegram, WhatsApp, or CSV.",
     icon: Share2,
-    size: "lg:col-span-8",
-    color: "bg-foreground/5"
-  },
-  {
-    title: "Sonic Playback",
-    desc: "High-fidelity text-to-speech. Listen to your reports while you commute.",
-    icon: Speaker,
-    size: "lg:col-span-12",
-    color: "bg-primary/10"
+    span: "md:col-span-2"
   }
 ];
 
 export default function Features() {
   return (
-    <section className="py-32 px-6 md:px-12 bg-background border-y border-foreground/5">
+    <section className="py-32 px-6 md:px-12 bg-background border-b border-border">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-24">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-6 block">Capabilities</span>
-          <h2 className="text-5xl md:text-7xl font-display font-extrabold uppercase tracking-tighter leading-[0.9]">
-            Beyond <br />
-            Simple <span className="text-primary italic">Summaries.</span>
-          </h2>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-8">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-6 block">Capabilities</span>
+            <h2 className="text-5xl md:text-7xl font-bold uppercase tracking-tight">
+              Powerful <span className="text-primary italic">Output.</span>
+            </h2>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border border border-border">
           {features.map((feature, idx) => (
-            <motion.div 
+            <div 
               key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: idx * 0.1 }}
-              whileHover={{ y: -5 }}
-              className={`${feature.size} group relative overflow-hidden border border-foreground/10 p-12 flex flex-col justify-between min-h-[400px] ${feature.color} transition-all duration-500 cursor-default`}
+              className={`${feature.span} bg-black p-12 hover:bg-white/[0.02] transition-colors group`}
             >
-              <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/[0.02] transition-colors duration-500" />
-              
-              <div className="relative z-10">
-                <div className="w-16 h-16 border border-foreground/10 flex items-center justify-center mb-12 bg-background group-hover:border-primary/50 group-hover:rotate-12 transition-all duration-500">
-                  <feature.icon className="w-8 h-8 text-primary" />
-                </div>
-                <h3 className="text-4xl font-display font-bold uppercase tracking-tight mb-6">{feature.title}</h3>
-                <p className="max-w-md text-lg text-foreground/60 leading-relaxed font-medium">
-                  {feature.desc}
-                </p>
+              <div className="w-12 h-12 border border-white/10 flex items-center justify-center mb-10 group-hover:border-primary transition-colors">
+                <feature.icon className="w-6 h-6 text-primary" />
               </div>
-              
-              {/* Abstract decorative element for each card */}
-              <div className="absolute bottom-0 right-0 w-32 h-32 bg-primary/5 -mb-16 -mr-16 rotate-45 group-hover:scale-150 transition-transform duration-700" />
-              
-              <div className="relative z-10 mt-12 flex items-center gap-2 overflow-hidden">
-                <div className="h-[1px] w-full bg-foreground/10" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/20 whitespace-nowrap">Core Engine</span>
-              </div>
-            </motion.div>
+              <h3 className="text-3xl font-bold uppercase tracking-tight mb-4">{feature.title}</h3>
+              <p className="text-foreground/40 leading-relaxed max-w-sm">
+                {feature.desc}
+              </p>
+            </div>
           ))}
+          
+          <div className="md:col-span-3 bg-primary p-12 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-6">
+              <Speaker className="w-12 h-12 text-black" />
+              <div>
+                <h3 className="text-3xl font-bold uppercase text-black">Sonic Playback</h3>
+                <p className="text-black/60 font-bold uppercase text-xs tracking-widest">Listen to your documents on the go.</p>
+              </div>
+            </div>
+            <button className="bg-black text-white px-10 py-5 font-bold uppercase tracking-widest hover:scale-105 transition-transform">
+              Try It Now
+            </button>
+          </div>
         </div>
       </div>
     </section>
   );
 }
-

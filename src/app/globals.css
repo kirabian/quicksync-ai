@@ -9,41 +9,29 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-accent: var(--accent);
   --color-border: var(--border);
-  --radius-lg: var(--radius);
+  --radius-lg: 0px;
 }
 
 :root {
-  --background: oklch(0.1 0 0); /* Near black */
-  --foreground: oklch(0.95 0.01 100); /* Off-white */
-  --primary: oklch(0.85 0.18 110); /* Acid Green */
-  --primary-foreground: oklch(0.1 0 0);
-  --accent: oklch(0.85 0.18 110);
-  --border: oklch(1 0 0 / 10%);
-  --radius: 0rem; /* Sharp edges for that editorial look */
-}
-
-.dark {
-  --background: oklch(0.05 0 0); /* Deepest black */
-  --foreground: oklch(0.95 0.01 100);
-  --primary: oklch(0.85 0.18 110);
-  --primary-foreground: oklch(0.1 0 0);
-  --border: oklch(1 0 0 / 10%);
+  --background: #000000;
+  --foreground: #ffffff;
+  --primary: #C1FF72; /* Solid Acid Green */
+  --primary-foreground: #000000;
+  --border: #1a1a1a;
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border selection:bg-primary selection:text-primary-foreground;
   }
   body {
-    @apply bg-background text-foreground selection:bg-primary selection:text-primary-foreground;
+    @apply bg-background text-foreground antialiased;
   }
   h1, h2, h3, h4 {
-    @apply font-display font-extrabold tracking-tighter;
+    @apply font-sans font-bold tracking-tight uppercase;
   }
 }
 

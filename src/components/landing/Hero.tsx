@@ -1,147 +1,213 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Link as LinkIcon, FileText, Upload } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Link as LinkIcon, Upload } from "lucide-react";
+import { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import pdfToText from "react-pdftotext";
+import { toast } from "sonner";
 
-export default function Hero() {
+interface HeroProps {
+  onAnalyze: (text: string) => Promise<void>;
+  isLoading: boolean;
+}
+
+export default function Hero({ onAnalyze, isLoading }: HeroProps) {
   const [inputValue, setInputValue] = useState("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
 
-  const handleAnalyze = () => {
-    if (!inputValue) return;
-    setIsAnalyzing(true);
-    setTimeout(() => setIsAnalyzing(false), 3000);
+  const handleAnalyze = async () => {
+    if (!inputValue.trim()) return;
+    
+    setLocalLoading(true);
+    try {
+      let textToProcess = inputValue;
+
+      // Check if it's a URL
+      if (inputValue.startsWith("http")) {
+        const res = await fetch("/api/scrape", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: inputValue }),
+        });
+
+        if (!res.ok) throw new Error("Failed to scrape URL");
+        const data = await res.json();
+        textToProcess = data.text;
+      }
+
+      await onAnalyze(textToProcess);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to process input");
+    } finally {
+      setLocalLoading(false);
+    }
   };
 
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file || file.type !== "application/pdf") {
+      toast.error("Please upload a valid PDF file");
+      return;
+    }
+
+    setLocalLoading(true);
+    try {
+      const extractedText = await pdfToText(file);
+      await onAnalyze(extractedText);
+    } catch (error) {
+      toast.error("Failed to extract text from PDF");
+    } finally {
+      setLocalLoading(false);
+    }
+  }, [onAnalyze]);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: { "application/pdf": [".pdf"] },
+    multiple: false,
+  });
+
+  const isBusy = isLoading || localLoading;
+
   return (
-    <section className="relative min-h-screen flex flex-col pt-32 pb-20 px-6 md:px-12 overflow-hidden">
-      {/* Decorative background element - minimalist */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 -skew-x-12 translate-x-1/4 z-0" />
-      
-      <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-        <div className="lg:col-span-8">
-          <motion.h1 
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-[12vw] md:text-[8vw] lg:text-[7vw] leading-[0.85] font-display font-extrabold uppercase tracking-tighter mb-8"
+    <section className="relative min-h-screen flex flex-col justify-center pt-32 pb-20 px-6 md:px-12 border-b border-border">
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+        <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 mb-8"
           >
-            Drop a link. <br />
-            <span className="text-primary italic">Get the picture.</span>
+            <div className="w-4 h-4 bg-primary" />
+            <span className="text-xs font-bold tracking-[0.3em] uppercase text-primary">Intelligence Engine v1.0</span>
+          </motion.div>
+
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-6xl md:text-8xl font-bold uppercase leading-[0.95] tracking-tight mb-8"
+          >
+            Any text. <br />
+            <span className="text-primary italic">Instant Action.</span>
           </motion.h1>
           
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-xl text-xl md:text-2xl text-foreground/70 mb-12 leading-relaxed"
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="max-w-lg text-lg text-foreground/60 mb-12"
           >
-            QuickSync AI turns messy articles, long PDFs, and raw transcripts into structured action items and professional drafts in under 10 seconds.
+            QuickSync AI processes documents, URLs, and transcripts into structured briefs and ready-to-sync tasks in seconds.
           </motion.p>
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="relative max-w-2xl group"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="space-y-4"
           >
-            <div className="absolute -inset-1 bg-primary/20 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
-            <div className="relative flex flex-col md:flex-row gap-2 bg-background border-2 border-foreground/10 p-2 focus-within:border-primary transition-colors">
-              <div className="flex-1 flex items-center px-4 gap-3">
+            <div className="flex flex-col md:flex-row gap-0 border-2 border-white focus-within:border-primary transition-colors">
+              <div className="flex-1 flex items-center px-6 gap-4 bg-white/5">
                 <LinkIcon className="w-5 h-5 text-foreground/40" />
                 <input 
                   type="text" 
-                  placeholder="Paste article URL or raw text here..."
-                  className="w-full bg-transparent border-none outline-none py-4 text-lg font-medium placeholder:text-foreground/20"
+                  placeholder="Paste article URL or raw text..."
+                  className="w-full bg-transparent border-none outline-none py-6 text-lg font-medium placeholder:text-foreground/20"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                 />
               </div>
               <button 
                 onClick={handleAnalyze}
-                disabled={isAnalyzing}
-                className="bg-primary text-primary-foreground px-8 py-4 font-display font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 min-w-[180px]"
+                disabled={isBusy}
+                className="bg-primary text-primary-foreground px-12 py-6 font-bold uppercase tracking-widest hover:bg-white transition-colors flex items-center justify-center gap-3 disabled:opacity-50 min-w-[200px]"
               >
-                {isAnalyzing ? (
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
-                  />
-                ) : (
-                  <>Analyze <ArrowRight className="w-5 h-5" /></>
-                )}
+                {isBusy ? "Processing..." : "Analyze"} <ArrowRight className="w-5 h-5" />
               </button>
             </div>
-            <div className="mt-4 flex items-center gap-6">
-              <button className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-foreground/40 hover:text-primary transition-colors">
-                <Upload className="w-4 h-4" /> Upload PDF
-              </button>
-              <div className="h-1 w-1 rounded-full bg-foreground/20" />
-              <p className="text-xs font-medium text-foreground/30 uppercase tracking-widest">
-                No credit card required
+            
+            <div className="flex items-center gap-6 pt-2">
+              <div {...getRootProps()}>
+                <input {...getInputProps()} />
+                <button 
+                  disabled={isBusy}
+                  className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-foreground/40 hover:text-primary transition-colors disabled:opacity-50"
+                >
+                  <Upload className="w-4 h-4" /> Upload PDF
+                </button>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-white/20" />
+              <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                Free Tier: No Login Required
               </p>
             </div>
           </motion.div>
         </div>
 
-        <div className="lg:col-span-4 hidden lg:block">
+        <div className="relative hidden lg:block">
           <motion.div 
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="relative bg-foreground/5 border border-foreground/10 p-8 aspect-[3/4] flex flex-col"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+            className="bg-[#0a0a0a] border border-white/10 p-10 aspect-square flex flex-col"
           >
-            <div className="flex items-center gap-2 mb-8">
-              <div className="w-3 h-3 rounded-full bg-primary" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/40">Live Preview</span>
+            <div className="flex justify-between items-center mb-10 pb-6 border-b border-white/5">
+              <div className="flex gap-1.5">
+                <div className="w-2 h-2 bg-primary" />
+                <div className="w-2 h-2 bg-white/10" />
+                <div className="w-2 h-2 bg-white/10" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">Output Terminal</span>
             </div>
-            
-            <div className="space-y-6">
-              <div className="h-4 w-3/4 bg-foreground/10 rounded-full" />
-              <div className="h-4 w-full bg-foreground/10 rounded-full" />
-              <div className="h-4 w-2/3 bg-foreground/10 rounded-full" />
-              
-              <div className="pt-8 space-y-4">
-                <div className="p-4 border border-primary/20 bg-primary/5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Summary</span>
+
+            <div className="space-y-8 flex-1">
+              <div className="space-y-3">
+                <div className="h-1 w-1/4 bg-primary" />
+                <div className="h-4 w-full bg-white/5" />
+                <div className="h-4 w-5/6 bg-white/5" />
+              </div>
+
+              <div className="space-y-4 pt-4">
+                <div className="p-5 border border-white/10 bg-white/[0.02]">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3 block">Extracted Summary</span>
+                  <div className="space-y-2">
+                    <div className="h-2 w-full bg-white/10" />
+                    <div className="h-2 w-full bg-white/10" />
+                    <div className="h-2 w-2/3 bg-white/10" />
                   </div>
-                  <p className="text-xs leading-relaxed text-foreground/60 italic">
-                    "This document outlines the strategic pivot for Q3, focusing on automated pipeline synchronization..."
-                  </p>
                 </div>
-                
-                <div className="p-4 border border-foreground/10 bg-foreground/5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-foreground/20" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/40">Action Items</span>
+
+                <div className="p-5 border border-white/10 bg-white/[0.02]">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3 block">Action Items</span>
+                  <div className="space-y-3">
+                    <div className="flex gap-3 items-center">
+                      <div className="w-1.5 h-1.5 bg-primary" />
+                      <div className="h-2 w-1/2 bg-white/5" />
+                    </div>
+                    <div className="flex gap-3 items-center">
+                      <div className="w-1.5 h-1.5 bg-primary" />
+                      <div className="h-2 w-2/3 bg-white/5" />
+                    </div>
                   </div>
-                  <ul className="text-[10px] space-y-2 text-foreground/60">
-                    <li className="flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-primary" /> Schedule review with stakeholders (May 12)
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-primary" /> Update API documentation
-                    </li>
-                  </ul>
                 </div>
               </div>
             </div>
-            
-            <div className="mt-auto flex justify-between items-center pt-8">
-              <div className="flex gap-2">
-                <div className="w-8 h-8 rounded-full bg-foreground/10 border border-foreground/10" />
-                <div className="w-8 h-8 rounded-full bg-foreground/10 border border-foreground/10" />
-                <div className="w-8 h-8 rounded-full bg-foreground/10 border border-foreground/10" />
+
+            <div className="mt-10 flex justify-between">
+              <div className="flex gap-3">
+                <div className="w-10 h-10 border border-white/10 flex items-center justify-center text-white/20 text-[10px] font-bold">PDF</div>
+                <div className="w-10 h-10 border border-white/10 flex items-center justify-center text-white/20 text-[10px] font-bold">MD</div>
               </div>
-              <div className="px-4 py-2 bg-foreground text-background text-[10px] font-bold uppercase tracking-widest">
-                Share
+              <div className="px-6 h-10 bg-white text-black text-[10px] font-bold uppercase tracking-widest flex items-center">
+                Sync to Notion
               </div>
             </div>
           </motion.div>
+          
+          {/* Decorative frame */}
+          <div className="absolute -inset-4 border border-white/5 -z-10" />
         </div>
       </div>
     </section>

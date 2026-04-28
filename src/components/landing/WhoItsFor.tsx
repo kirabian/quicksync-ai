@@ -5,62 +5,46 @@ import { motion } from "framer-motion";
 const personas = [
   {
     role: "The Executive",
-    case: "Turn 50-page industry reports into 5-minute briefings before the board meeting.",
-    image: "https://images.unsplash.com/photo-1519085185758-29178f07c00a?auto=format&fit=crop&q=80&w=800"
+    case: "Turn 50-page reports into 5-minute briefs."
   },
   {
     role: "The Researcher",
-    case: "Extract key citations and datasets from academic papers without the manual slog.",
-    image: "https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?auto=format&fit=crop&q=80&w=800"
+    case: "Extract key citations and data instantly."
   },
   {
     role: "The Freelancer",
-    case: "Draft professional follow-ups and project proposals from raw client transcripts.",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800"
+    case: "Draft proposals from raw client calls."
   },
   {
     role: "The Team Lead",
-    case: "Convert meeting recordings into Notion-ready action items with assigned dates.",
-    image: "https://images.unsplash.com/photo-1522071823990-b9978ec20227?auto=format&fit=crop&q=80&w=800"
+    case: "Convert meetings into Notion action items."
   }
 ];
 
 export default function WhoItsFor() {
   return (
-    <section className="py-32 px-6 md:px-12 bg-background overflow-hidden">
+    <section className="py-32 px-6 md:px-12 bg-background border-b border-border">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-start mb-24">
-          <h2 className="text-6xl md:text-8xl font-display font-extrabold uppercase tracking-tighter leading-[0.8] max-w-2xl">
-            Built for <br />
-            those who <span className="text-primary italic">do.</span>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-8">
+          <h2 className="text-5xl md:text-7xl font-bold uppercase tracking-tight">
+            Designed for <span className="text-primary italic">Impact.</span>
           </h2>
-          <div className="hidden lg:block w-32 h-32 border-2 border-foreground/5 rotate-12 flex-shrink-0" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-foreground/10 border border-foreground/10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-border border border-border">
           {personas.map((p, idx) => (
-            <motion.div 
+            <div 
               key={idx}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, delay: idx * 0.2 }}
-              className="group relative h-[400px] bg-background p-12 flex flex-col justify-end overflow-hidden"
+              className="bg-black p-10 flex flex-col justify-between aspect-square group hover:bg-primary transition-colors duration-500"
             >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-700 bg-cover bg-center grayscale" style={{ backgroundImage: `url(${p.image})` }} />
-              
-              <div className="relative z-10">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 block">Persona 0{idx + 1}</span>
-                <h3 className="text-4xl font-display font-bold uppercase tracking-tight mb-4">{p.role}</h3>
-                <p className="max-w-xs text-foreground/50 font-medium leading-relaxed">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20 group-hover:text-black/40">Persona 0{idx + 1}</span>
+              <div className="space-y-4">
+                <h3 className="text-3xl font-bold uppercase tracking-tight leading-none group-hover:text-black transition-colors">{p.role}</h3>
+                <p className="text-foreground/40 font-medium group-hover:text-black/60 transition-colors">
                   {p.case}
                 </p>
               </div>
-              
-              <div className="absolute top-12 right-12 text-[80px] font-display font-black text-foreground/5 select-none leading-none">
-                {idx + 1}
-              </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
