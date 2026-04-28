@@ -11,6 +11,7 @@
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
   --color-border: var(--border);
   --radius-lg: var(--radius);
