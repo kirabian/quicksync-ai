@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Syne, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -18,10 +18,13 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "QuickSync AI",
-  description: "Convert PDFs and text into Notion/Trello notes in 10 seconds using AI.",
+  title: "QuickSync AI | Editorial Document Intelligence",
+  description: "Transform messy links and documents into structured, actionable intelligence in seconds.",
   manifest: "/manifest.json",
-  themeColor: "#8b5cf6"
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
