@@ -10,17 +10,40 @@ import Pricing from "@/components/landing/Pricing";
 import Footer from "@/components/landing/Footer";
 import { toast } from "sonner";
 import ResultView from "@/components/ResultView";
+import LoginModal from "@/components/landing/LoginModal";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
   const [resultMarkdown, setResultMarkdown] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const checkUsageLimit = () => {
+    const usage = localStorage.getItem("qs_usage_count");
+    const count = usage ? parseInt(usage) : 0;
+    
+    // Check if user is logged in (to be implemented with Auth.js)
+    // For now, only check localStorage for anonymous limit
+    if (count >= 2) {
+      setShowLoginModal(true);
+      return false;
+    }
+    return true;
+  };
+
+  const incrementUsage = () => {
+    const usage = localStorage.getItem("qs_usage_count");
+    const count = usage ? parseInt(usage) : 0;
+    localStorage.setItem("qs_usage_count", (count + 1).toString());
+  };
+
   const handleProcessText = async (text: string, role: string = "General") => {
+    if (!checkUsageLimit()) return;
+
     setIsProcessing(true);
     try {
       const response = await fetch("/api/generate", {
@@ -35,9 +58,9 @@ export default function LandingPage() {
 
       const data = await response.json();
       setResultMarkdown(data.result);
+      incrementUsage();
       toast.success("Analysis complete!");
       
-      // Scroll to result if needed, or just let the Hero handle it
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error: any) {
       toast.error(error.message || "An error occurred");
@@ -50,6 +73,7 @@ export default function LandingPage() {
 
   return (
     <div className="bg-background text-foreground">
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
       <nav className="fixed top-0 left-0 w-full z-[100] px-6 md:px-12 py-8 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/5">
         <div className="flex items-center gap-3 cursor-pointer group">
           <div className="w-6 h-6 bg-primary" />

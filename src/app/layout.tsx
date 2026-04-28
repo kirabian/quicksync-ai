@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Syne, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { Providers } from "@/components/providers";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 
@@ -36,18 +35,14 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${syne.variable} ${outfit.variable} antialiased bg-background text-foreground font-sans`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <Providers>
             <main className="flex-1 flex flex-col">
               {children}
             </main>
           <Toaster position="bottom-right" richColors />
           <OfflineIndicator />
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
