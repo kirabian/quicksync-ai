@@ -11,8 +11,10 @@ import Footer from "@/components/landing/Footer";
 import { toast } from "sonner";
 import ResultView from "@/components/ResultView";
 import LoginModal from "@/components/landing/LoginModal";
+import { useSession, signOut } from "next-auth/react";
 
 export default function LandingPage() {
+  const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const [resultMarkdown, setResultMarkdown] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -23,11 +25,11 @@ export default function LandingPage() {
   }, []);
 
   const checkUsageLimit = () => {
+    if (session) return true; // Logged in users have no local limit
+
     const usage = localStorage.getItem("qs_usage_count");
     const count = usage ? parseInt(usage) : 0;
     
-    // Check if user is logged in (to be implemented with Auth.js)
-    // For now, only check localStorage for anonymous limit
     if (count >= 2) {
       setShowLoginModal(true);
       return false;
@@ -36,6 +38,8 @@ export default function LandingPage() {
   };
 
   const incrementUsage = () => {
+    if (session) return; // Don't track local usage for logged in users
+
     const usage = localStorage.getItem("qs_usage_count");
     const count = usage ? parseInt(usage) : 0;
     localStorage.setItem("qs_usage_count", (count + 1).toString());
@@ -92,9 +96,22 @@ export default function LandingPage() {
           ))}
         </div>
         
-        <button className="bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary transition-colors">
-          Launch App
-        </button>
+        <div className="flex items-center gap-6">
+          {session ? (
+            <button 
+              onClick={() => signOut()}
+              className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-primary transition-colors"
+            >
+              Sign Out
+            </button>
+          ) : null}
+          <button 
+            onClick={() => session ? toast.success("Dashboard coming soon!") : setShowLoginModal(true)}
+            className="bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary transition-colors"
+          >
+            {session ? "Open Dashboard" : "Launch App"}
+          </button>
+        </div>
       </nav>
 
       <main>
