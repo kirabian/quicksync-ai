@@ -66,7 +66,7 @@ export default function Pricing() {
                 ? 'bg-black text-white hover:scale-105' 
                 : 'bg-primary text-black hover:scale-105'
               }`}>
-                {tier.featured ? 'Get Pro' : 'Start Free'}
+                {tier.name === "Starter" ? "Current Plan" : "Coming Soon"}
               </button>
             </div>
           ))}
