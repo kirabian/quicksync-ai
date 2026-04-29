@@ -33,16 +33,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   }, [isOpen]);
 
   const handleTelegramLogin = () => {
-    const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME;
-    if (!botName) {
-      alert("NEXT_PUBLIC_TELEGRAM_BOT_NAME belum diatur di file .env.local");
+    const botId = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID;
+    if (!botId) {
+      alert("NEXT_PUBLIC_TELEGRAM_BOT_ID belum diatur di file .env.local");
       return;
     }
 
-    // Gunakan Telegram Login Widget API
+    // Gunakan Telegram Login Widget API dengan bot_id (numeric)
     if ((window as any).Telegram?.Login) {
       (window as any).Telegram.Login.auth(
-        { bot_id: botName, request_access: true },
+        { bot_id: botId, request_access: true },
         (data: any) => {
           if (data) {
             (window as any).onTelegramAuth(data);
