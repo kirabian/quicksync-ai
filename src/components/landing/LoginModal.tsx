@@ -117,16 +117,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 Login with X / Twitter
               </button>
               
-              <button 
-                onClick={handleTelegramLogin}
-                className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-white/10 transition-colors"
-              >
-                <Send className="w-4 h-4 text-[#229ED9]" />
-                Login with Telegram
-              </button>
-              
-              {/* Hidden Telegram Widget for initialization */}
-              <div id="hidden-telegram-login" className="hidden"></div>
+              {/* Tombol Resmi Telegram Widget */}
+              <div className="w-full flex justify-center py-2 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                <div 
+                  id="telegram-login-container"
+                  dangerouslySetInnerHTML={{
+                    __html: `<script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="${process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME}" data-size="large" data-onauth="onTelegramAuth(user)" data-request-access="write"></script>`
+                  }}
+                />
+              </div>
             </div>
 
             <div className="mt-8 pt-8 border-t border-white/5">
