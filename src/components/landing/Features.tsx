@@ -32,13 +32,13 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="py-32 px-6 md:px-12 bg-background border-b border-border">
+    <section className="py-32 px-6 md:px-12 bg-white border-b border-border">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-8">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-6 block">Capabilities</span>
-            <h2 className="text-5xl md:text-7xl font-bold uppercase tracking-tight">
-              Powerful <span className="text-primary italic">Output.</span>
+            <h2 className="text-5xl md:text-7xl font-bold uppercase tracking-tight text-foreground">
+              Ekstraksi <span className="text-primary">Tanpa Basa-Basi.</span>
             </h2>
           </div>
         </div>
@@ -47,28 +47,28 @@ export default function Features() {
           {features.map((feature, idx) => (
             <div 
               key={idx}
-              className={`${feature.span} bg-black p-12 hover:bg-white/[0.02] transition-colors group`}
+              className={`${feature.span} bg-[#F8FAFC] p-12 hover:bg-white transition-colors group border-r border-b border-border`}
             >
-              <div className="w-12 h-12 border border-white/10 flex items-center justify-center mb-10 group-hover:border-primary transition-colors">
+              <div className="w-12 h-12 border border-border bg-white flex items-center justify-center mb-10 group-hover:border-primary transition-colors">
                 <feature.icon className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-3xl font-bold uppercase tracking-tight mb-4">{feature.title}</h3>
-              <p className="text-foreground/40 leading-relaxed max-w-sm">
+              <h3 className="text-3xl font-bold uppercase tracking-tight mb-4 text-foreground">{feature.title}</h3>
+              <p className="text-muted leading-relaxed max-w-sm">
                 {feature.desc}
               </p>
             </div>
           ))}
           
           <div className="md:col-span-3 bg-primary p-12 flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-6">
-              <Speaker className="w-12 h-12 text-black" />
+            <div className="flex items-center gap-6 text-white">
+              <Speaker className="w-12 h-12" />
               <div>
-                <h3 className="text-3xl font-bold uppercase text-black">Sonic Playback</h3>
-                <p className="text-black/60 font-bold uppercase text-xs tracking-widest">Listen to your documents on the go.</p>
+                <h3 className="text-3xl font-bold uppercase">Sonic Playback</h3>
+                <p className="font-bold uppercase text-xs tracking-widest opacity-60">Dengarkan ringkasan dokumen Anda di mana saja.</p>
               </div>
             </div>
-            <button className="bg-black text-white px-10 py-5 font-bold uppercase tracking-widest hover:scale-105 transition-transform">
-              Try It Now
+            <button className="bg-white text-primary px-10 py-5 font-bold uppercase tracking-widest hover:scale-105 transition-transform">
+              Coba Sekarang
             </button>
           </div>
         </div>

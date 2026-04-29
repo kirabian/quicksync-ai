@@ -8,19 +8,20 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --color-muted: var(--muted);
   --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-foreground: #ffffff;
+  --color-action: #EA580C;
   --color-border: var(--border);
   --radius-lg: 0px;
 }
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
-  --primary: #C1FF72; /* Solid Acid Green */
-  --primary-foreground: #000000;
-  --border: #1a1a1a;
+  --background: #FFFFFF;
+  --foreground: #0F172A; /* Slate-900 */
+  --muted: #475569; /* Slate-600 */
+  --primary: #2563EB; /* Blue-600 */
+  --border: #E2E8F0; /* Slate-200 */
 }
 
 @layer base {
