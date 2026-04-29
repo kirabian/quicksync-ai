@@ -89,8 +89,8 @@ export default function Hero({ onAnalyze, isLoading }: HeroProps) {
             transition={{ duration: 0.6 }}
             className="text-6xl md:text-8xl font-bold uppercase leading-[0.95] tracking-tight mb-8"
           >
-            Any text. <br />
-            <span className="text-primary italic">Instant Action.</span>
+            Smarter Extraction. <br />
+            <span className="text-primary italic">Zero Fluff.</span>
           </motion.h1>
           
           <motion.p 
@@ -99,7 +99,7 @@ export default function Hero({ onAnalyze, isLoading }: HeroProps) {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="max-w-lg text-lg text-foreground/60 mb-12"
           >
-            QuickSync AI processes documents, URLs, and transcripts into structured briefs and ready-to-sync tasks in seconds.
+            Ubah laporan 50 halaman atau notulen rapat panjang menjadi ringkasan satu paragraf dan butir aksi yang bisa langsung dieksekusi. Didesain untuk Analis, PM, dan Konsultan.
           </motion.p>
 
           <motion.div 

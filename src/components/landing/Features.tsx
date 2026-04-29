@@ -6,25 +6,25 @@ import { Zap, Database, MessageSquare, Share2, Speaker } from "lucide-react";
 const features = [
   {
     title: "Surgical Summary",
-    desc: "A high-fidelity breakdown of themes, sentiment, and core arguments.",
+    desc: "Ekstraksi presisi satu paragraf yang menangkap inti dari laporan atau artikel terpanjang sekalipun.",
     icon: Zap,
     span: "md:col-span-2"
   },
   {
-    title: "Action Items",
-    desc: "Automated extraction of deadlines and ownership from any text.",
+    title: "Action Item Engine",
+    desc: "Otomatis mendeteksi tugas, tenggat waktu, dan siapa yang bertanggung jawab dari notulen rapat.",
     icon: Database,
     span: "md:col-span-1"
   },
   {
-    title: "Pro Drafts",
-    desc: "Generate professional follow-up emails and formal letters instantly.",
+    title: "Key Decisions",
+    desc: "Jangan lewatkan keputusan penting dalam transkrip panjang. Kami menemukannya untuk Anda.",
     icon: MessageSquare,
     span: "md:col-span-1"
   },
   {
     title: "Universal Sync",
-    desc: "One-click export to Notion, Telegram, WhatsApp, or CSV.",
+    desc: "Ekspor satu klik ke Notion, WhatsApp, atau Telegram untuk koordinasi tim instan.",
     icon: Share2,
     span: "md:col-span-2"
   }

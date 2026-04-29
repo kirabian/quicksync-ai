@@ -4,20 +4,20 @@ import { motion } from "framer-motion";
 
 const personas = [
   {
-    role: "The Executive",
-    case: "Turn 50-page reports into 5-minute briefs."
+    role: "The Consultant",
+    case: "Baca laporan 50 halaman dan temukan action items klien dalam 10 detik."
+  },
+  {
+    role: "The Product Manager",
+    case: "Ubah transkrip Zoom/Meet yang berantakan menjadi keputusan & tugas tim."
+  },
+  {
+    role: "The Journalist",
+    case: "Masukkan URL artikel panjang untuk ambil intisari fakta tanpa distraksi."
   },
   {
     role: "The Researcher",
-    case: "Extract key citations and data instantly."
-  },
-  {
-    role: "The Freelancer",
-    case: "Draft proposals from raw client calls."
-  },
-  {
-    role: "The Team Lead",
-    case: "Convert meetings into Notion action items."
+    case: "Otomatisasi ekstraksi sitasi dan data dari tumpukan PDF jurnal."
   }
 ];
 

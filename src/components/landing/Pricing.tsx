@@ -7,19 +7,22 @@ const tiers = [
   {
     name: "Starter",
     price: "0",
+    period: "/mo",
     features: ["5 documents/month", "Core Summaries", "Basic Action Items", "Shared Links"],
     featured: false
   },
   {
     name: "Pro",
-    price: "9",
-    features: ["Unlimited Docs", "Professional Drafts", "Notion Sync", "TTS Audio Export", "Translation Engine"],
+    price: "5",
+    period: "/mo",
+    features: ["Unlimited Docs", "Notion Sync", "TTS Audio Export", "Translation Engine"],
     featured: true
   },
   {
-    name: "Team",
+    name: "Lifetime",
     price: "29",
-    features: ["Everything in Pro", "API Access", "Shared Workspaces", "Priority Support", "Custom Roles"],
+    period: "once",
+    features: ["Everything in Pro", "Unlimited Access", "Priority Support", "Early Beta Access"],
     featured: false
   }
 ];
@@ -46,7 +49,7 @@ export default function Pricing() {
                 </span>
                 <div className="flex items-baseline gap-1">
                   <span className="text-7xl font-bold tracking-tighter">${tier.price}</span>
-                  <span className={`text-xs font-bold uppercase tracking-widest ${tier.featured ? 'text-black/40' : 'text-white/20'}`}>/mo</span>
+                  <span className={`text-xs font-bold uppercase tracking-widest ${tier.featured ? 'text-black/40' : 'text-white/20'}`}>{tier.period}</span>
                 </div>
               </div>
 
