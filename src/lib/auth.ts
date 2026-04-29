@@ -20,63 +20,24 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.TWITTER_SECRET || "",
       version: "2.0",
     }),
-    CredentialsProvider({
+    {
       id: "telegram",
       name: "Telegram",
-      credentials: {
-        id: { label: "id", type: "text" },
-        first_name: { label: "first_name", type: "text" },
-        last_name: { label: "last_name", type: "text" },
-        username: { label: "username", type: "text" },
-        photo_url: { label: "photo_url", type: "text" },
-        auth_date: { label: "auth_date", type: "text" },
-        hash: { label: "hash", type: "text" },
-      },
-      async authorize(credentials) {
-        if (!credentials || !credentials.hash) return null;
-
-        const botToken = process.env.TELEGRAM_BOT_TOKEN;
-        if (!botToken) {
-          console.error("TELEGRAM_BOT_TOKEN is not set");
-          return null;
-        }
-
-        const { hash, ...data } = credentials;
-        
-        // Filter out null/undefined and sort keys
-        const dataCheckArr = Object.keys(data)
-          .filter(key => data[key as keyof typeof data] !== undefined && data[key as keyof typeof data] !== null)
-          .sort()
-          .map((key) => `${key}=${data[key as keyof typeof data]}`);
-        
-        const dataCheckString = dataCheckArr.join("\n");
-
-        const secretKey = createHash("sha256").update(botToken).digest();
-        const hmac = createHmac("sha256", secretKey)
-          .update(dataCheckString)
-          .digest("hex");
-
-        if (hmac !== hash) {
-          console.error("Telegram hash verification failed");
-          return null;
-        }
-
-        // Check if auth_date is within last 24 hours to prevent replay attacks
-        const authDate = parseInt(credentials.auth_date);
-        const now = Math.floor(Date.now() / 1000);
-        if (now - authDate > 86400) {
-          console.error("Telegram auth_date is too old");
-          return null;
-        }
-
+      type: "oauth",
+      wellKnown: "https://oauth.telegram.org/.well-known/openid-configuration",
+      authorization: { params: { scope: "openid profile" } },
+      idToken: true,
+      clientId: process.env.TELEGRAM_CLIENT_ID,
+      clientSecret: process.env.TELEGRAM_CLIENT_SECRET,
+      profile(profile) {
         return {
-          id: credentials.id,
-          name: credentials.username || credentials.first_name,
-          image: credentials.photo_url,
-          email: `${credentials.id}@telegram.user`, // Fake email for next-auth compatibility
+          id: profile.sub,
+          name: profile.nickname || profile.given_name,
+          image: profile.picture,
+          email: `${profile.sub}@telegram.user`,
         };
       },
-    }),
+    },
   ],
   callbacks: {
     async session({ session, token }: any) {

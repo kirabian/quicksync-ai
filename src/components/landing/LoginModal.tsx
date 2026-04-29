@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Github, Twitter, Mail, Send } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { useEffect } from "react";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -11,49 +10,6 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  useEffect(() => {
-    if (isOpen) {
-      // Define the callback for Telegram
-      (window as any).onTelegramAuth = (user: any) => {
-        signIn("telegram", {
-          ...user,
-          callbackUrl: "/",
-        });
-      };
-
-      // Load Telegram script if not already loaded
-      if (!document.getElementById("telegram-widget-script")) {
-        const script = document.createElement("script");
-        script.id = "telegram-widget-script";
-        script.src = "https://telegram.org/js/telegram-widget.js?22";
-        script.async = true;
-        document.body.appendChild(script);
-      }
-    }
-  }, [isOpen]);
-
-  const handleTelegramLogin = () => {
-    const botId = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID;
-    if (!botId) {
-      alert("NEXT_PUBLIC_TELEGRAM_BOT_ID belum diatur di file .env.local");
-      return;
-    }
-
-    // Gunakan Telegram Login Widget API dengan bot_id (numeric)
-    if ((window as any).Telegram?.Login) {
-      (window as any).Telegram.Login.auth(
-        { bot_id: botId, request_access: true },
-        (data: any) => {
-          if (data) {
-            (window as any).onTelegramAuth(data);
-          }
-        }
-      );
-    } else {
-      alert("Telegram widget sedang dimuat, silakan coba lagi dalam beberapa detik.");
-    }
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -117,15 +73,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 Login with X / Twitter
               </button>
               
-              {/* Tombol Resmi Telegram Widget */}
-              <div className="w-full flex justify-center py-2 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                <div 
-                  id="telegram-login-container"
-                  dangerouslySetInnerHTML={{
-                    __html: `<script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="${process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME}" data-size="large" data-onauth="onTelegramAuth(user)"></script>`
-                  }}
-                />
-              </div>
+              <button 
+                onClick={() => signIn("telegram")}
+                className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-white/10 transition-colors"
+              >
+                <Send className="w-4 h-4 text-[#229ED9]" />
+                Login with Telegram
+              </button>
             </div>
 
             <div className="mt-8 pt-8 border-t border-white/5">
