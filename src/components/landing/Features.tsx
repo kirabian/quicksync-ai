@@ -32,43 +32,46 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="py-32 px-6 md:px-12 bg-white border-b border-border">
+    <section className="py-32 px-6 md:px-12 bg-background">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-8">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-6 block">Capabilities</span>
-            <h2 className="text-5xl md:text-7xl font-bold uppercase tracking-tight text-foreground">
-              Ekstraksi <span className="text-primary">Tanpa Basa-Basi.</span>
-            </h2>
-          </div>
+        <div className="text-center mb-24">
+          <span className="text-xs font-bold uppercase tracking-[0.3em] text-primary mb-4 block">Our Capabilities</span>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+            Precision <span className="text-primary">Engineering.</span>
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border border border-border">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((feature, idx) => (
             <div 
               key={idx}
-              className={`${feature.span} bg-[#F8FAFC] p-12 hover:bg-white transition-colors group border-r border-b border-border`}
+              className={`p-10 rounded-3xl border border-border bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-all group ${feature.span === 'md:col-span-2' ? 'md:col-span-2' : ''}`}
             >
-              <div className="w-12 h-12 border border-border bg-white flex items-center justify-center mb-10 group-hover:border-primary transition-colors">
-                <feature.icon className="w-6 h-6 text-primary" />
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-8 group-hover:scale-110 transition-transform">
+                <feature.icon className="w-7 h-7" />
               </div>
-              <h3 className="text-3xl font-bold uppercase tracking-tight mb-4 text-foreground">{feature.title}</h3>
-              <p className="text-muted leading-relaxed max-w-sm">
+              <h3 className="text-2xl font-bold tracking-tight text-foreground mb-4">{feature.title}</h3>
+              <p className="text-foreground/70 font-medium leading-relaxed text-lg">
                 {feature.desc}
               </p>
             </div>
           ))}
           
-          <div className="md:col-span-3 bg-primary p-12 flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-6 text-white">
-              <Speaker className="w-12 h-12" />
+          <div className="md:col-span-3 mt-12 p-12 rounded-3xl bg-primary text-white flex flex-col md:flex-row justify-between items-center gap-10 overflow-hidden relative group">
+            <div className="absolute inset-0 bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+            
+            <div className="relative z-10 flex items-center gap-8">
+              <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md">
+                <Speaker className="w-8 h-8" />
+              </div>
               <div>
-                <h3 className="text-3xl font-bold uppercase">Sonic Playback</h3>
-                <p className="font-bold uppercase text-xs tracking-widest opacity-60">Dengarkan ringkasan dokumen Anda di mana saja.</p>
+                <h3 className="text-3xl font-bold tracking-tight mb-1">Sonic Playback</h3>
+                <p className="font-medium text-white/90">Dengarkan dokumen Anda dengan kualitas suara jernih.</p>
               </div>
             </div>
-            <button className="bg-white text-primary px-10 py-5 font-bold uppercase tracking-widest hover:scale-105 transition-transform">
-              Coba Sekarang
+            
+            <button className="relative z-10 bg-white text-primary px-10 py-5 rounded-2xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10">
+              Coba Demo Gratis
             </button>
           </div>
         </div>

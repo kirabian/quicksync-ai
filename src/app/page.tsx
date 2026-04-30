@@ -11,6 +11,7 @@ import Footer from "@/components/landing/Footer";
 import { toast } from "sonner";
 import ResultView from "@/components/ResultView";
 import LoginModal from "@/components/landing/LoginModal";
+import { Sun, Moon } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 
 export default function LandingPage() {
@@ -19,10 +20,26 @@ export default function LandingPage() {
   const [resultMarkdown, setResultMarkdown] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    // Sync with system or local storage
+    const savedTheme = localStorage.getItem("qs_theme");
+    if (savedTheme) {
+      setIsDark(savedTheme === "dark");
+    }
   }, []);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("qs_theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("qs_theme", "light");
+    }
+  }, [isDark]);
 
   const checkUsageLimit = () => {
     if (session) return true; // Logged in users have no local limit
@@ -76,40 +93,48 @@ export default function LandingPage() {
   if (!mounted) return null;
 
   return (
-    <div className="bg-background text-foreground">
+    <div className="bg-background text-foreground transition-colors duration-300">
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
-      <nav className="fixed top-0 left-0 w-full z-[100] px-6 md:px-12 py-8 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/5">
-        <div className="flex items-center gap-3 cursor-pointer group">
-          <div className="w-6 h-6 bg-primary" />
-          <span className="text-2xl font-bold uppercase tracking-tighter">QuickSync</span>
+      <nav className="fixed top-0 left-0 w-full z-[100] px-4 md:px-12 py-6 md:py-8 flex justify-between items-center bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="flex items-center gap-2 md:gap-3 cursor-pointer group">
+          <div className="w-4 h-4 md:w-6 md:h-6 bg-primary rounded-md" />
+          <span className="text-xl md:text-2xl font-bold tracking-tighter">QuickSync</span>
         </div>
         
-        <div className="hidden md:flex gap-12">
+        <div className="hidden lg:flex gap-12">
           {["Features", "Pricing", "About"].map((item) => (
             <a 
               key={item} 
               href={`#${item.toLowerCase()}`} 
-              className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 hover:text-primary transition-colors"
+              className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted hover:text-primary transition-colors"
             >
               {item}
             </a>
           ))}
         </div>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6">
+          <button 
+            onClick={() => setIsDark(!isDark)}
+            className="p-2 rounded-xl bg-muted/10 hover:bg-muted/20 transition-colors text-muted hover:text-primary"
+            aria-label="Toggle theme"
+          >
+            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+
           {session ? (
             <button 
               onClick={() => signOut()}
-              className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-primary transition-colors"
+              className="hidden sm:block text-[11px] font-bold uppercase tracking-widest text-muted hover:text-primary transition-colors"
             >
               Sign Out
             </button>
           ) : null}
           <button 
             onClick={() => session ? toast.success("Dashboard coming soon!") : setShowLoginModal(true)}
-            className="bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary transition-colors"
+            className="bg-primary text-white px-4 md:px-8 py-2 md:py-3 text-[11px] font-bold uppercase tracking-[0.1em] rounded-xl hover:bg-primary/90 transition-all active:scale-95"
           >
-            {session ? "Open Dashboard" : "Launch App"}
+            {session ? "Dashboard" : "Mulai Pakai"}
           </button>
         </div>
       </nav>
@@ -118,13 +143,13 @@ export default function LandingPage() {
         {!resultMarkdown ? (
           <>
             <Hero onAnalyze={handleProcessText} isLoading={isProcessing} />
-            <div id="features">
-              <HowItWorks />
-              <Features />
-            </div>
             <WhoItsFor />
             <div id="pricing">
               <Pricing />
+            </div>
+            <div id="features">
+              <HowItWorks />
+              <Features />
             </div>
           </>
         ) : (
