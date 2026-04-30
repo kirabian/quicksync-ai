@@ -174,6 +174,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       disabled={isLoading}
                       className="w-full py-4 bg-white text-black font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-primary transition-colors group"
                     >
+                      <Mail className="w-4 h-4" />
                       Login with Google
                     </button>
                     
@@ -182,7 +183,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       disabled={isLoading}
                       className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-white/10 transition-colors"
                     >
+                      <Github className="w-4 h-4" />
                       Login with GitHub
+                    </button>
+
+                    <button 
+                      onClick={() => handleSocialLogin('twitter')}
+                      disabled={isLoading}
+                      className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-white/10 transition-colors"
+                    >
+                      <Twitter className="w-4 h-4" />
+                      Login with X / Twitter
                     </button>
                     
                     <button 

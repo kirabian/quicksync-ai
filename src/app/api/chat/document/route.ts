@@ -24,8 +24,8 @@ export async function POST(req: Request) {
       .eq("id", user.id)
       .single();
 
-    if (!profile?.is_premium && (profile?.chat_count || 0) >= 20) {
-      return NextResponse.json({ error: "Chat limit reached for this month." }, { status: 403 });
+    if (!profile?.is_premium && (profile?.chat_count || 0) >= 1000) {
+      return NextResponse.json({ error: "Limit chat tercapai." }, { status: 403 });
     }
 
     // Fetch document content

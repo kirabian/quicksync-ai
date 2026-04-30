@@ -24,9 +24,9 @@ export async function POST(req: Request) {
         .eq("id", user.id)
         .single();
 
-      if (!profile?.is_premium && (profile?.summarize_count || 0) >= 5) {
+      if (!profile?.is_premium && (profile?.summarize_count || 0) >= 1000) {
         return NextResponse.json(
-          { error: "Summarization limit reached for this week." },
+          { error: "Limit tercapai. Silakan coba lagi nanti." },
           { status: 403 }
         );
       }
