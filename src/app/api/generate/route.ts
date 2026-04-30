@@ -1,15 +1,49 @@
 import { NextResponse } from "next/server";
 import { generateResilientContent } from "@/lib/gemini";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(req: Request) {
   try {
-    const { text, role } = await req.json();
+    const { text, role, fileName } = await req.json();
 
     if (!text) {
       return NextResponse.json(
         { error: "Content text is required" },
         { status: 400 }
       );
+    }
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Limit check for logged-in users
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.is_premium && (profile?.summarize_count || 0) >= 5) {
+        return NextResponse.json(
+          { error: "Summarization limit reached for this week." },
+          { status: 403 }
+        );
+      }
+
+      // Increment summarize count
+      await supabase.from("profiles").update({ 
+        summarize_count: (profile?.summarize_count || 0) + 1 
+      }).eq("id", user.id);
+
+      // Save document
+      await supabase.from("documents").insert([
+        { 
+          user_id: user.id, 
+          name: fileName || `Document - ${new Date().toLocaleDateString()}`, 
+          content: text 
+        }
+      ]);
     }
 
     const roleInstruction = role && role !== "General" 
@@ -56,5 +90,6 @@ SPECIAL INSTRUCTIONS:
     );
   }
 }
+
 
 

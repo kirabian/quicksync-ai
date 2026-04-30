@@ -11,20 +11,34 @@ import Footer from "@/components/landing/Footer";
 import { toast } from "sonner";
 import ResultView from "@/components/ResultView";
 import LoginModal from "@/components/landing/LoginModal";
-import { Sun, Moon } from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
+import { Sun, Moon, LogOut, LayoutDashboard } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LandingPage() {
-  const { data: session } = useSession();
+  const [user, setUser] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
   const [resultMarkdown, setResultMarkdown] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isDark, setIsDark] = useState(true);
+  const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
-    // Sync with system or local storage
+    
+    // Check session
+    const getSession = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
     const savedTheme = localStorage.getItem("qs_theme");
     if (savedTheme) {
       setIsDark(savedTheme === "dark");
@@ -42,7 +56,7 @@ export default function LandingPage() {
   }, [isDark]);
 
   const checkUsageLimit = () => {
-    if (session) return true; // Logged in users have no local limit
+    if (user) return true; // Logged in users handled server-side
 
     const usage = localStorage.getItem("qs_usage_count");
     const count = usage ? parseInt(usage) : 0;
@@ -55,14 +69,14 @@ export default function LandingPage() {
   };
 
   const incrementUsage = () => {
-    if (session) return; // Don't track local usage for logged in users
+    if (user) return; // Don't track local usage for logged in users
 
     const usage = localStorage.getItem("qs_usage_count");
     const count = usage ? parseInt(usage) : 0;
     localStorage.setItem("qs_usage_count", (count + 1).toString());
   };
 
-  const handleProcessText = async (text: string, role: string = "General") => {
+  const handleProcessText = async (text: string, role: string = "General", fileName?: string) => {
     if (!checkUsageLimit()) return;
 
     setIsProcessing(true);
@@ -70,7 +84,7 @@ export default function LandingPage() {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, role }),
+        body: JSON.stringify({ text, role, fileName }),
       });
 
       if (!response.ok) {
@@ -122,19 +136,28 @@ export default function LandingPage() {
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
 
-          {session ? (
-            <button 
-              onClick={() => signOut()}
-              className="hidden sm:block text-[11px] font-bold uppercase tracking-widest text-muted hover:text-primary transition-colors"
-            >
-              Sign Out
-            </button>
+          {user ? (
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/dashboard"
+                className="hidden sm:flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted hover:text-primary transition-colors"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                Dashboard
+              </Link>
+              <button 
+                onClick={() => supabase.auth.signOut()}
+                className="hidden sm:block text-[11px] font-bold uppercase tracking-widest text-muted hover:text-red-500 transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
           ) : null}
           <button 
-            onClick={() => session ? toast.success("Dashboard coming soon!") : setShowLoginModal(true)}
+            onClick={() => user ? router.push("/dashboard") : setShowLoginModal(true)}
             className="bg-primary text-white px-4 md:px-8 py-2 md:py-3 text-[11px] font-bold uppercase tracking-[0.1em] rounded-xl hover:bg-primary/90 transition-all active:scale-95"
           >
-            {session ? "Dashboard" : "Mulai Pakai"}
+            {user ? "Dashboard" : "Mulai Pakai"}
           </button>
         </div>
       </nav>

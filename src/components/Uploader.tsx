@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FileUp, Type, Loader2, UserCircle, Link as LinkIcon, Globe } from "lucide-react";
 import { toast } from "sonner";
 
-export default function Uploader({ onProcessText }: { onProcessText: (text: string, role: string) => Promise<void> }) {
+export default function Uploader({ onProcessText }: { onProcessText: (text: string, role: string, fileName?: string) => Promise<void> }) {
   const [activeTab, setActiveTab] = useState<"file" | "text" | "url">("file");
   const [textInput, setTextInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
@@ -46,7 +46,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
     try {
       setIsProcessing(true);
       const extractedText = await pdfToText(file);
-      await onProcessText(extractedText, role);
+      await onProcessText(extractedText, role, file.name);
     } catch (error) {
       console.error(error);
       toast.error("Failed to extract text from PDF");
@@ -104,7 +104,7 @@ export default function Uploader({ onProcessText }: { onProcessText: (text: stri
         throw new Error("No readable text found on this page.");
       }
 
-      await onProcessText(data.text, role);
+      await onProcessText(data.text, role, urlInput);
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || "Failed to process URL");
