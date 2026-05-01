@@ -62,17 +62,25 @@ export async function POST(req: Request) {
     const result = await generateResilientContent(prompt);
     const responseText = result.response.text();
 
-    // Save chat history
-    await supabase.from("chat_history").insert([
-      { user_id: user.id, document_id: documentId, message: message, role: "user" },
-      { user_id: user.id, document_id: documentId, message: responseText, role: "assistant" },
-    ]);
-
-    // Update chat count
-    await supabase.from("profiles").update({ 
-      chat_count: (profile?.chat_count || 0) + 1 
-    }).eq("id", user.id);
-
+    // Save chat history (Non-blocking)
+    try {
+      await supabase.from("chat_history").insert([
+        { user_id: user.id, document_id: documentId, message: message, role: "user" },
+        { user_id: user.id, document_id: documentId, message: responseText, role: "assistant" },
+      ]);
+    } catch (dbError) {
+      console.error("Failed to save chat history:", dbError);
+    }
+    
+    // Update chat count (Non-blocking)
+    try {
+      await supabase.from("profiles").update({ 
+        chat_count: (profile?.chat_count || 0) + 1 
+      }).eq("id", user.id);
+    } catch (dbError) {
+      console.error("Failed to update chat count:", dbError);
+    }
+    
     return NextResponse.json({ result: responseText });
   } catch (error: any) {
     console.error("Chat API Error:", error);
