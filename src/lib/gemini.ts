@@ -19,24 +19,36 @@ export async function generateResilientContent(prompt: string, retries = 2) {
     // Try primary model first
     return await model31.generateContent(prompt);
   } catch (error: any) {
-    const isOverloaded = error.message?.includes("503") || error.message?.includes("high demand");
+    const errorMsg = error.message?.toLowerCase() || "";
+    const isOverloaded = errorMsg.includes("503") || errorMsg.includes("overloaded") || errorMsg.includes("high demand");
+    const isQuotaExceeded = errorMsg.includes("429") || errorMsg.includes("quota");
     
     if (isOverloaded) {
       console.warn("Gemini 3.1 overloaded, falling back to Gemini 1.5 Flash...");
       try {
         return await model15.generateContent(prompt);
       } catch (fallbackError: any) {
+        const fallbackMsg = fallbackError.message?.toLowerCase() || "";
+        if (fallbackMsg.includes("quota") || fallbackMsg.includes("429")) {
+          throw new Error("GEMINI_QUOTA_EXCEEDED");
+        }
+        
         if (retries > 0) {
-          console.log(`Retrying after error... (${retries} attempts left)`);
+          console.log(`Retrying after fallback error... (${retries} attempts left)`);
           await new Promise(resolve => setTimeout(resolve, 2000));
           return generateResilientContent(prompt, retries - 1);
         }
         throw fallbackError;
       }
     }
+
+    if (isQuotaExceeded) {
+      throw new Error("GEMINI_QUOTA_EXCEEDED");
+    }
     
     // For other errors, still try retry logic
     if (retries > 0) {
+      console.log(`Retrying after error: ${error.message} (${retries} attempts left)`);
       await new Promise(resolve => setTimeout(resolve, 2000));
       return generateResilientContent(prompt, retries - 1);
     }

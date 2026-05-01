@@ -1,8 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateResilientContent } from "@/lib/gemini";
 import { NextResponse } from "next/server";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: Request) {
   try {
@@ -40,9 +38,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
-    // Prepare Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
     const prompt = `
       You are an expert assistant that answers questions based on a provided document.
       
@@ -63,7 +58,7 @@ export async function POST(req: Request) {
       ANSWER:
     `;
 
-    const result = await model.generateContent(prompt);
+    const result = await generateResilientContent(prompt);
     const responseText = result.response.text();
 
     // Save chat history
@@ -80,6 +75,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ result: responseText });
   } catch (error: any) {
     console.error("Chat API Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    
+    if (error.message === "GEMINI_QUOTA_EXCEEDED") {
+      return NextResponse.json(
+        { error: "Quota Gemini habis atau limit tercapai. Silakan coba lagi nanti atau hubungi admin." },
+        { status: 429 }
+      );
+    }
+
+    // Handle other known Gemini errors if not already caught by lib
+    if (error.message?.includes("503") || error.message?.toLowerCase().includes("overloaded")) {
+      return NextResponse.json(
+        { error: "Server Gemini sedang sibuk. Silakan coba sesaat lagi." },
+        { status: 503 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Gagal memproses chat. Silakan coba lagi." }, 
+      { status: 500 }
+    );
   }
 }

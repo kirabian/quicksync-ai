@@ -84,8 +84,16 @@ SPECIAL INSTRUCTIONS:
     return NextResponse.json({ result: responseText });
   } catch (error: any) {
     console.error("Gemini API Error:", error);
+    
+    if (error.message === "GEMINI_QUOTA_EXCEEDED") {
+      return NextResponse.json(
+        { error: "Quota Gemini habis atau limit tercapai. Silakan coba lagi nanti atau hubungi admin." },
+        { status: 429 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Failed to generate content", details: error.message || "Unknown error" },
+      { error: "Gagal menghasilkan konten. Silakan coba lagi.", details: error.message || "Unknown error" },
       { status: 500 }
     );
   }
